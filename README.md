@@ -29,7 +29,7 @@ The long-term goal is to design the app so it can be deployed in a **cloud-nativ
 
 > Edit this section with your actual team names and roles.
 
-- **DevOps & Backend Engineer –DeVayhn**
+- **DevOps & Backend Engineer – DeVayhn**
   - Sets up and maintains the GitHub repo structure
   - Plans and documents backend architecture
   - Helps design CI/CD and deployment strategy
