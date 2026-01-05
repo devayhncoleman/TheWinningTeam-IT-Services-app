@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Showcase Gallery | DeVayhn Coleman</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <div class="page-accent"></div>
+
+    <div class="page-main">
+      <!-- HEADER -->
+      <header class="gallery-header">
+  <div class="header-left">
+    <h1>Showcase Gallery</h1>
+    <p class="tagline">
+      Curated work, features, and artifacts from my journey in tech &amp; operations.
+    </p>
+  </div>
+
+  <div class="header-right">
+    <p class="mini header-note">
+      A rotating view into repos, labs, and creative work that shows how I think and build.
+    </p>
+  </div>
+</header>
+
+<!-- SAME ACTION BAR PATTERN -->
+<div class="header-actions">
+  <div class="header-actions-left">
+    <a href="index.html">
+      <button type="button">Back to Home</button>
+    </a>
+  </div>
+
+  <div class="header-actions-right">
+    <button id="toggleNightShift" type="button">Night Shift Mode 🦉</button>
+
+    <button id="musicToggle" type="button">Play music 🎵</button>
+
+    <label class="vol">
+      <span>Volume</span>
+      <input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.25">
+    </label>
+
+    <audio id="bgMusic" src="assets/Chill2.mp3" preload="auto"></audio>
+    <audio id="alertSound" src="assets/shocked.mp3" preload="auto"></audio>
+  </div>
+</div>
+
+
+      <!-- NAV -->
+      <nav>
+        <div class="nav-inner">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#gallery">Showcase</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- GALLERY -->
+      <section id="gallery" data-reveal>
+        <h2>Royal Gallery</h2>
+        <p class="gallery-intro mini">
+          A rotating selection of links to projects, writeups, labs, talks, and artifacts that reflect how I think, build, and operate.
+        </p>
+
+        <div class="gallery-grid">
+          <article class="gallery-card">
+            <div class="gallery-frame">
+              <div class="gallery-tag">Featured</div>
+              <h3>GitHub Portfolio Repo</h3>
+              <p>The source code behind this site, including layout, styling, and interactive elements.</p>
+            </div>
+            <div class="gallery-meta">
+              <span class="mini">Category: Infrastructure &amp; Frontend</span>
+              <a href="https://github.com/devayhncoleman/My-Folio" target="_blank" rel="noopener">
+                <button type="button">View on GitHub</button>
+              </a>
+            </div>
+          </article>
+
+          <article class="gallery-card">
+            <div class="gallery-frame">
+              <div class="gallery-tag">Professional</div>
+              <h3>LinkedIn Profile</h3>
+              <p>Experience, certifications, and journey aligned with operations, NOC, and cloud-focused roles.</p>
+            </div>
+            <div class="gallery-meta">
+              <span class="mini">Category: Professional Profile</span>
+              <a href="https://www.linkedin.com/in/devayhn-coleman-788411223/" target="_blank" rel="noopener">
+                <button type="button">Open LinkedIn</button>
+              </a>
+            </div>
+          </article>
+
+          <article class="gallery-card">
+            <div class="gallery-frame">
+              <div class="gallery-tag">Labs</div>
+              <h3>Security / NOC Lab Highlights</h3>
+              <p>Reserved for a future write-up or repo showcasing monitoring, incident handling, or blue-team exercises.</p>
+            </div>
+            <div class="gallery-meta">
+              <span class="mini">Category: Hands-on Practice</span>
+              <a href="#" target="_blank" rel="noopener">
+                <button type="button">Coming Soon</button>
+              </a>
+            </div>
+          </article>
+
+          <article class="gallery-card">
+            <div class="gallery-frame">
+              <div class="gallery-tag">Creative</div>
+              <h3>Personal / Creative Work</h3>
+              <p>Reserved for music, writing, or visuals that show my personality beyond tickets and terminals.</p>
+            </div>
+            <div class="gallery-meta">
+              <span class="mini">Category: Creative</span>
+              <a href="#" target="_blank" rel="noopener">
+                <button type="button">Add Link</button>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer>
+        <p>&copy; 2025 DeVayhn (Devayjah) Coleman — Showcase</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
