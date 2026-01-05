@@ -53,6 +53,6 @@ The long-term goal is to design the app so it can be deployed in a **cloud-nativ
 ```text
 TheWinningTeam-IT-Services-app/
 ├─ backend/          # Lambda/function code and backend tests
-├─ docs/             # Design docs, API specs, diagrams
+├─ docs/             # Design docs, API specs, diagrams / UI code for the IT services app
 ├─ infra/            # Infrastructure-as-Code templates (future)
 └─ README.md         # You are here
