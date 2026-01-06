@@ -19,6 +19,7 @@ For now:
 userId = "demo-user" is hard-coded.
 
 0. Overview
+
 0.1 Resource Areas
 | Area            | Purpose                       | Status          |
 | --------------- | ----------------------------- | --------------- |
