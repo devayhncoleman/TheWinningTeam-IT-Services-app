@@ -1,80 +1,74 @@
-# API Design — TheWinningTeam IT Services API
+✅ TheWinningTeam — API Design
 
-This document defines the HTTP API for **TheWinningTeam**, an IT services platform built on:
+This document defines the HTTP API for TheWinningTeam, an IT services platform built on:
 
-- Amazon API Gateway (HTTP API)
-- AWS Lambda (Python)
-- Amazon DynamoDB (see `database-schema.md`)
+Amazon API Gateway (HTTP API)
 
-All responses are JSON. Timestamps use ISO 8601 (e.g., `"2026-01-06T09:23:34.289634Z"`).
+AWS Lambda (Python)
 
-> Note: Authentication and real user/role context will be added later (e.g., via Amazon Cognito). For now, `userId` is hard-coded as `"demo-user"` in backend logic.
+Amazon DynamoDB
 
----
+All responses are JSON.
+Timestamps use ISO 8601 (YYYY-MM-DDTHH:MM:SSZ).
 
-## 1. Resources & Endpoints (Current)
+Note
 
-### 1.1 Tickets
+Authentication will be added later (ex: Amazon Cognito).
 
-**Lambda:** `TicketsHandlerPython`  
-**Table:** `Tickets`
+For now:
+userId = "demo-user" is hard-coded.
 
-**Implemented endpoints:**
+0. Overview
+0.1 Resource Areas
+| Area            | Purpose                       | Status          |
+| --------------- | ----------------------------- | --------------- |
+| Tickets         | Create + view support tickets | **Implemented** |
+| Ticket Messages | Chat inside a ticket          | **Implemented** |
+| Emergency       | Escalation workflow           | **Implemented** |
+| Admin           | Users / groups / assignment   | **Implemented** |
+| Auth            | JWT / roles                   | Planned         |
 
-| Method | Path           | Description                           |
-|--------|----------------|---------------------------------------|
-| POST   | `/tickets`     | Create a new ticket                   |
-| GET    | `/tickets`     | List tickets for the current user     |
+1. Tickets API
 
-**Planned / future (not yet implemented):**
+Lambda: TicketsHandlerPython
+Table: Tickets
 
-| Method | Path                      | Description                       |
-|--------|---------------------------|-----------------------------------|
-| GET    | `/tickets/{ticketId}`     | Get a single ticket by ID         |
-| PATCH  | `/tickets/{ticketId}`     | Update ticket status/fields       |
-
----
-
-#### 1.1.1 Create Ticket
-
-**Endpoint**
-
-```http
+1.1 Create Ticket
 POST /tickets
 
-Request (JSON)
+Request Body
 
 {
   "title": "Printer not working",
-  "description": "The printer on floor 3 keeps jamming.",
+  "description": "The printer jams constantly.",
   "priority": "HIGH",
   "isEmergency": false
 }
 
-
 Behavior
 
-Creates a ticket for the current user (userId = "demo-user" for now).
+Creates a new ticket for the current user
 
-Sets:
+Fields set automatically:
+
+ticketId
 
 status = "IN_REVIEW"
 
-createdAt / updatedAt to current time
+createdAt
 
-isEmergency → "EMERGENCY" or "NORMAL" (string) for GSI
+updatedAt
 
-isEmergencyBool → true / false for app logic
+isEmergency = "NORMAL" | "EMERGENCY"
 
-Writes item to Tickets table.
+isEmergencyBool = true | false
 
-Response — 201 Created
-
+Success — 201
 {
   "userId": "demo-user",
-  "ticketId": "ticket_a0ea3ab190824f77b51461034f960138",
+  "ticketId": "ticket_abc123",
   "title": "Printer not working",
-  "description": "The printer on floor 3 keeps jamming.",
+  "description": "The printer jams constantly.",
   "status": "IN_REVIEW",
   "priority": "HIGH",
   "isEmergency": "NORMAL",
@@ -83,33 +77,26 @@ Response — 201 Created
   "updatedAt": "2026-01-06T09:17:23.924160Z"
 }
 
+Errors (Possible)
+| Code | Meaning                 |
+| ---- | ----------------------- |
+| 400  | Missing required fields |
+| 500  | Server / DB error       |
 
-Error responses
-
-400 Bad Request — missing title or description
-
-500 Internal Server Error — DynamoDB or other server error
-
-1.1.2 List Tickets for Current User
-
-Endpoint
-
+1.2 List User Tickets
 GET /tickets
-
 
 Behavior
 
-Returns all tickets where userId = current user ("demo-user" for now).
+Returns all tickets for current user.Behavior
 
-Uses a DynamoDB Query on the Tickets table, keyed by userId.
-
-Response — 200 OK
-
+Returns all tickets for current user.
+Success — 200
 {
   "items": [
     {
       "userId": "demo-user",
-      "ticketId": "ticket_a0ea3ab190824f77b51461034f960138",
+      "ticketId": "ticket_abc123",
       "title": "Whole office down",
       "description": "No network",
       "status": "IN_REVIEW",
@@ -122,50 +109,32 @@ Response — 200 OK
   ]
 }
 
+| Method | Path                  | Purpose               |
+| ------ | --------------------- | --------------------- |
+| GET    | `/tickets/{ticketId}` | View a single ticket  |
+| PATCH  | `/tickets/{ticketId}` | Update status/details |
 
-Error responses
-
-500 Internal Server Error — query failure
-
-1.2 Ticket Messages (Chat)
+2. Ticket Messages (Chat)
 
 Lambda: MessagesHandlerPython
 Table: TicketMessages
 
-Endpoints:
+| Method | Path                           | Purpose       |
+| ------ | ------------------------------ | ------------- |
+| GET    | `/tickets/{ticketId}/messages` | List messages |
+| POST   | `/tickets/{ticketId}/messages` | Add message   |
 
-Method	Path	Description
-GET	/tickets/{ticketId}/messages	List messages for a ticket
-POST	/tickets/{ticketId}/messages	Add a new message to a ticket
-
-Path parameters
-
-ticketId — ID of the ticket the messages belong to
-
-1.2.1 List Ticket Messages
-
-Endpoint
-
+2.1 List Messages
 GET /tickets/{ticketId}/messages
 
-
-Behavior
-
-Queries TicketMessages table with:
-
-ticketId as partition key
-
-Returns all messages ordered by timestamp.
-
-Response — 200 OK
-
+Success — 200
 {
   "ticketId": "TEST123",
   "messages": [
     {
       "ticketId": "TEST123",
       "timestamp": "2026-01-06T08:49:40.448547Z",
-      "messageId": "msg_a9e9fcc146f241738708d740629cde7d",
+      "messageId": "msg_123",
       "senderId": "demo-user",
       "senderRole": "customer",
       "messageText": "hello!",
@@ -174,188 +143,98 @@ Response — 200 OK
   ]
 }
 
-1.2.2 Create Ticket Message
-
-Endpoint
-
+2.2 Create Message
 POST /tickets/{ticketId}/messages
 
-
-Request (JSON)
-
+Request Body
 {
   "messageText": "hello!",
   "senderId": "demo-user",
   "senderRole": "customer"
 }
 
-
-Behavior
-
-Validates messageText is present.
-
-Uses ticketId from the path.
-
-Writes a new item to TicketMessages with:
-
-ticketId (PK)
-
-timestamp (SK)
-
-messageId
-
-senderId
-
-senderRole
-
-messageText
-
-isSystem = false
-
-Response — 201 Created
-
+Success — 201
 {
   "ticketId": "TEST123",
   "timestamp": "2026-01-06T08:49:40.448547Z",
-  "messageId": "msg_a9e9fcc146f241738708d740629cde7d",
+  "messageId": "msg_123",
   "senderId": "demo-user",
   "senderRole": "customer",
   "messageText": "hello!",
   "isSystem": false
 }
 
+Errors (Possible)
+| Code | Meaning               |
+| ---- | --------------------- |
+| 400  | Missing `messageText` |
+| 500  | DB error              |
 
-Error responses
-
-400 Bad Request — missing messageText or invalid JSON
-
-500 Internal Server Error — DynamoDB error
-
-1.3 Emergency API
-
+3. Emergency API
 Lambda: EmergencyHandlerPython
-Table: Tickets (same as normal tickets)
-GSI: EmergencyTickets on isEmergency (partition key) and optionally createdAt (sort key)
+Table: Tickets
+GSI: EmergencyTickets
 
-Endpoints:
+| Method | Path                       | Purpose                 |
+| ------ | -------------------------- | ----------------------- |
+| POST   | `/emergency`               | Create emergency ticket |
+| GET    | `/admin/emergency-tickets` | List emergency tickets  |
 
-Method	Path	Description
-POST	/emergency	Create an emergency ticket
-GET	/admin/emergency-tickets	List emergency tickets
-1.3.1 Create Emergency Ticket
-
-Endpoint
-
+3.1 Create Emergency Ticket
 POST /emergency
-
-
-Request (JSON)
-
 {
   "title": "Whole office down",
   "description": "No network",
   "priority": "CRITICAL"
 }
 
-
 Behavior
-
-Creates a ticket similar to POST /tickets, but:
 
 Forces isEmergency = "EMERGENCY"
 
-Sets isEmergencyBool = true
-
-Uses priority default "CRITICAL" if not provided
-
-Response — 201 Created
-
+Success — 201
 {
-  "userId": "demo-user",
-  "ticketId": "ticket_a0ea3ab190824f77b51461034f960138",
-  "title": "Whole office down",
-  "description": "No network",
-  "status": "IN_REVIEW",
+  "ticketId": "ticket_abc123",
   "priority": "CRITICAL",
   "isEmergency": "EMERGENCY",
-  "isEmergencyBool": true,
-  "createdAt": "2026-01-06T09:17:23.924160Z",
-  "updatedAt": "2026-01-06T09:17:23.924160Z"
+  "isEmergencyBool": true
 }
 
-1.3.2 List Emergency Tickets
-
-Endpoint
+3.2 List Emergency Tickets
 
 GET /admin/emergency-tickets
 
-
-Behavior
-
-Queries Tickets table using the EmergencyTickets GSI:
-
-isEmergency = "EMERGENCY"
-
-Response — 200 OK
-
+Success — 200
 {
   "items": [
     {
-      "userId": "demo-user",
-      "ticketId": "ticket_a0ea3ab190824f77b51461034f960138",
-      "title": "Whole office down",
-      "description": "No network",
-      "status": "IN_REVIEW",
+      "ticketId": "ticket_abc123",
       "priority": "CRITICAL",
-      "isEmergency": "EMERGENCY",
-      "isEmergencyBool": true,
-      "createdAt": "2026-01-06T09:17:23.924160Z",
-      "updatedAt": "2026-01-06T09:17:23.924160Z"
+      "isEmergency": "EMERGENCY"
     }
   ]
 }
 
-1.4 Admin & Org Management
-
+4. Admin API
 Lambda: AdminHandlerPython
-Tables: Users, Groups, Tickets
 
-Endpoints:
+| Method | Path                               | Purpose             |
+| ------ | ---------------------------------- | ------------------- |
+| POST   | `/admin/groups`                    | Create/update group |
+| POST   | `/admin/users`                     | Create/update user  |
+| POST   | `/admin/tickets/{ticketId}/assign` | Assign ticket       |
 
-Method	Path	Description
-POST	/admin/groups	Create or update a group
-POST	/admin/users	Create or update a user
-POST	/admin/tickets/{ticketId}/assign	Assign/reassign a ticket
-1.4.1 Create/Update Group
-
-Endpoint
-
+4.1 Create/Update Group
 POST /admin/groups
 
-
-Request (JSON)
-
+Request Body
 {
   "groupId": "group_austin",
   "groupName": "Austin IT",
   "description": "Austin onsite team"
 }
 
-
-Behavior
-
-Upserts a record into Groups table:
-
-groupId (PK)
-
-groupName
-
-description
-
-createdAt (current time)
-
-Response — 201 Created
-
+Success — 201
 {
   "groupId": "group_austin",
   "groupName": "Austin IT",
@@ -363,15 +242,10 @@ Response — 201 Created
   "createdAt": "2026-01-06T09:23:34.289634Z"
 }
 
-1.4.2 Create/Update User
-
-Endpoint
-
+4.2 Create/Update User
 POST /admin/users
 
-
-Request (JSON)
-
+Request Body
 {
   "userId": "tech_john",
   "name": "John Doe",
@@ -380,91 +254,57 @@ Request (JSON)
   "groupId": "group_austin"
 }
 
-
-Behavior
-
-Upserts a record into Users table:
-
-userId (PK)
-
-name
-
-email
-
-role (e.g., "customer", "tech", "admin")
-
-groupId (optional)
-
-createdAt
-
-Response — 201 Created
-
+Success — 201
 {
   "userId": "tech_john",
   "name": "John Doe",
   "email": "john@example.com",
   "role": "tech",
-  "groupId": "group_austin",
-  "createdAt": "2026-01-06T09:30:00.000000Z"
+  "groupId": "group_austin"
 }
 
-1.4.3 Assign Ticket
-
-Endpoint
-
+4.3 Assign Ticket
 POST /admin/tickets/{ticketId}/assign
 
-
-Request (JSON)
-
+Request Body
 {
   "assignedTo": "tech_john",
   "groupId": "group_austin",
   "status": "ASSIGNED"
 }
 
-
-Behavior
-
-Updates the ticket in Tickets table:
-
-Sets assignedTo
-
-Sets groupId (if provided)
-
-Sets status (default "ASSIGNED" if omitted)
-
-Currently assumes userId = "demo-user" for the partition key; in a real multi-tenant setup, ticket lookup would use the correct userId from auth context.
-
-Response — 200 OK
-
+Success — 200
 {
-  "ticketId": "ticket_a0ea3ab190824f77b51461034f960138",
+  "ticketId": "ticket_abc123",
   "assignedTo": "tech_john",
   "groupId": "group_austin",
   "status": "ASSIGNED"
 }
 
-2. Authentication & Authorization (Future)
+5. Authentication (Planned)
 
-Integrate with Amazon Cognito to supply:
+Amazon Cognito user pool
 
-userId
+JWT in Authorization header
 
-role (customer, tech, admin)
+Roles:
 
-Enforce role-based access as defined in security-model.md.
+customer
 
-Replace hard-coded "demo-user" with values from JWT claims/auth context.
+tech
 
-3. Logging & Retention
+admin
 
-All requests and errors are logged via CloudWatch Logs for each Lambda function.
+6. Logging & Retention
 
-Ticket, message, and admin actions are persisted in DynamoDB tables.
+CloudWatch Logs for all Lambdas
 
-As defined in the data retention policy, operational logs and records are archived and/or deleted after 6–18 months depending on type and business requirements.
+DynamoDB stores:
 
+Tickets
 
-If you paste that over your existing `api-design.md`, it’ll line up with what you’ve actually built, and it gives you a clean contract to point to when you start building the admin dashboard and frontend calls.
-::contentReference[oaicite:0]{index=0}
+Messages
+
+Admin records
+
+Logs retained 6–18 months****
