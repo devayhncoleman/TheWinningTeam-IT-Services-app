@@ -1,4 +1,4 @@
-✅ Database Schema — DynamoDB Design
+Database Schema — DynamoDB Design
 
 This document describes the DynamoDB data model for the TheWinningTeam IT Services Platform.
 
