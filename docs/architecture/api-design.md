@@ -126,10 +126,11 @@ The backend helper `get_current_user()` will:
 > Note: Field names reflect the current Lambda & DynamoDB design.  
 > If implementation uses slightly different names, they should be updated here to match reality.
 
-✅ 5.1 User
+### 5.1 User
 
-DynamoDB Table: Users
+**DynamoDB Table:** `Users`
 
+```json
 {
   "userId": "customer_ashley",
   "email": "ashley@example.com",
@@ -140,11 +141,13 @@ DynamoDB Table: Users
   "updatedAt": "2026-01-05T20:15:30Z",
   "isActive": true
 }
+```
 
-✅ 5.2 Group
+### 5.2 Group
 
-DynamoDB Table: Groups
+**DynamoDB Table:** `Groups`
 
+```json
 {
   "groupId": "group_level_1",
   "name": "Level 1 Support",
@@ -152,38 +155,30 @@ DynamoDB Table: Groups
   "createdAt": "2026-01-05T20:15:30Z",
   "updatedAt": "2026-01-05T20:15:30Z"
 }
+```
 
-✅ 5.3 Ticket
+### 5.3 Ticket
 
-DynamoDB Table: Tickets
+**DynamoDB Table:** `Tickets`
 
+```json
 {
   "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
   "title": "VPN not connecting",
   "description": "I cannot connect to the corporate VPN from home.",
-  "status": "OPEN",
-  "priority": "NORMAL",
-  "isEmergency": "NORMAL",
+  "status": "OPEN",            // e.g. OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  "priority": "NORMAL",        // e.g. LOW, NORMAL, HIGH, CRITICAL
+  "isEmergency": "NORMAL",     // NORMAL | EMERGENCY
   "isEmergencyBool": false,
   "createdByUserId": "customer_ashley",
-  "assignedTechId": "tech_mike",
-  "assignedGroupId": "group_level_1",
+  "assignedTechId": "tech_mike",          // optional
+  "assignedGroupId": "group_level_1",     // optional
   "createdAt": "2026-01-05T20:15:30Z",
-  "updatedAt": "2026-01-05T20:15:30Z"
+  "updatedAt": "2026-01-05T21:02:10Z"
 }
+```
 
-✅ 5.4 Ticket Message
+### 5.4 Ticket Message
 
-DynamoDB Table: TicketMessages
-Partition Key: ticketId
-Sort Key: messageTimestamp
 
-{
-  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
-  "messageTimestamp": "2026-01-05T20:20:01Z",
-  "senderUserId": "customer_ashley",
-  "senderRole": "CUSTOMER",
-  "content": "Here is a screenshot of the error.",
-  "isSystem": false
-}
 
