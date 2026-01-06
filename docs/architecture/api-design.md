@@ -141,3 +141,20 @@ The backend helper `get_current_user()` will:
   "updatedAt": "2026-01-05T20:15:30Z",
   "isActive": true
 }
+
+5.2 Group
+
+DynamoDB Table: Groups
+
+{
+  "groupId": "group_level_1",
+  "name": "Level 1 Support",
+  "description": "Front-line IT support team",
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T20:15:30Z"
+}
+
+5.3 Ticket
+
+DynamoDB Table: Tickets
+
