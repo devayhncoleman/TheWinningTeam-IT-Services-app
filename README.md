@@ -11,6 +11,20 @@ The goal of this project is to build a simple web application where small busine
 - Track the status of their requests
 - Contact the IT team for follow-up
 
+## 📖 Documentation
+
+All documents are located in `/docs`.
+
+Key Sections:
+
+- Overview — `/docs/overview`
+- Product Requirements — `/docs/product`
+- Architecture — `/docs/architecture`
+- Operations — `/docs/operations`
+- Testing — `/docs/testing`
+- Deployment — `/docs/deployment`
+
+
 The long-term goal is to design the app so it can be deployed in a **cloud-native, DevOps-friendly** way using CI/CD and serverless backend services.
 
 ---
