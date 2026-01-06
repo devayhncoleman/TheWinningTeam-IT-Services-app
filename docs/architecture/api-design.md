@@ -39,18 +39,6 @@ The API is intended to be implemented using:
 
 ```http
 POST /tickets
-
-
-
-
-
-
-
-
-
-
-
-
 # API Design (Planned — AWS Lambda + API Gateway)
 
 ## Ticket Endpoints
