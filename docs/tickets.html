@@ -4,98 +4,91 @@
   <meta charset="UTF-8" />
   <title>The Winning Team – Ticket Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap"
-    rel="stylesheet"
-  >
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <div class="page-accent"></div>
+  <div class="ticket-shell">
 
-    <div class="page-main">
-      <!-- HEADER -->
-      <header class="site-header">
-        <div class="header-inner">
-          <h1 class="site-title">The Winning Team — Ticketing System</h1>
+    <!-- HEADER -->
+    <header class="ticket-header">
+      <div class="ticket-title-block">
+        <h1 class="ticket-title">The Winning Team — Ticketing System</h1>
+        <nav class="top-nav">
+          <a href="index.html" class="nav-pill">Home</a>
+          <a href="Showcase.html" class="nav-pill">Showcase</a>
+          <a href="tickets.html" class="nav-pill nav-pill--active">Ticket App</a>
+        </nav>
+      </div>
 
-          <nav class="site-nav">
-            <a href="index.html">Home</a>
-            <a href="Showcase.html">Showcase</a>
-            <a href="tickets.html" class="active">Ticket App</a>
-          </nav>
+      <div class="ticket-header-actions">
+        <button id="toggleNightShift" type="button">Night Shift Mode 🦉</button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="ticket-main">
+      <!-- Intro / context -->
+      <section class="section">
+        <h2>Customer Ticket Dashboard</h2>
+        <p>
+          This page talks to the live AWS backend for The Winning Team IT Services app.
+          It loads tickets for the selected user and shows them in real time.
+        </p>
+      </section>
+
+      <!-- “Act As” selector -->
+      <section class="section">
+        <h3>Act As (Dev Mode)</h3>
+        <p class="small-note">
+          For now, we use a header called <code>x-user-id</code> to pretend to be different users.
+          Later this will use real login via Cognito.
+        </p>
+
+        <div class="user-selector">
+          <label for="userSelect">Choose user:</label>
+          <select id="userSelect">
+            <option value="customer_ashley">Customer – Ashley</option>
+            <option value="tech_mike">Tech – Mike</option>
+            <option value="admin_jordan">Admin – Jordan</option>
+          </select>
+
+          <button id="loadTicketsBtn" class="primary-cta">Load Tickets</button>
         </div>
-      </header>
 
-      <!-- CONTENT -->
-      <main class="page-content">
+        <div id="statusMessage" class="status-message"></div>
+      </section>
 
-        <section class="section">
-          <h2>Customer Ticket Dashboard</h2>
-          <p>
-            This page talks to the live AWS backend for The Winning Team IT Services app.
-            It loads tickets for the selected user and shows them in real time.
-          </p>
-        </section>
+      <!-- Ticket list -->
+      <section class="section">
+        <h3>Tickets</h3>
+        <div class="table-wrapper">
+          <table id="ticketsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Emergency</th>
+                <th>Created</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Filled by tickets.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
 
-        <section class="section">
-          <h3>Act As (Dev Mode)</h3>
-          <p class="small-note mini">
-            For now, we use a header called <code>x-user-id</code> to pretend to be different users.
-            Later this will use real login via Cognito.
-          </p>
-
-          <div class="user-selector">
-            <label for="userSelect">Choose user:</label>
-            <select id="userSelect">
-              <option value="customer_ashley">Customer – Ashley</option>
-              <option value="tech_mike">Tech – Mike</option>
-              <option value="admin_jordan">Admin – Jordan</option>
-            </select>
-
-            <button id="loadTicketsBtn">Load Tickets</button>
-          </div>
-
-          <div id="statusMessage" class="status-message"></div>
-        </section>
-
-        <section class="section">
-          <h3>Tickets</h3>
-
-          <div class="table-wrapper">
-            <table id="ticketsTable">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Status</th>
-                  <th>Priority</th>
-                  <th>Emergency</th>
-                  <th>Created</th>
-                  <th>Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Filled by tickets.js -->
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </main>
-
-      <!-- FOOTER -->
-      <footer class="site-footer">
-        <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
-      </footer>
-    </div>
+    <footer class="site-footer site-footer--compact">
+      <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
+    </footer>
   </div>
 
+  <!-- Global theme + interactions, then ticket logic -->
+  <script src="script.js"></script>
   <script src="tickets.js"></script>
 </body>
 </html>
