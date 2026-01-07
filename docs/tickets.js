@@ -3,10 +3,8 @@
 // ==============================================
 
 // 1. Set your API base URL here.
-//    Replace <your-api-id> and region with your real API Gateway URL.
-//    Example you’ve used in PowerShell will look like:
-//    https://abc123.execute-api.us-east-1.amazonaws.com
-const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
+//    Make sure this matches what you use in PowerShell.
+const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com"; // <-- your real URL
 
 // 2. DOM elements
 const userSelect = document.getElementById("userSelect");
@@ -26,7 +24,6 @@ function formatDate(isoString) {
   if (!isoString) return "";
   try {
     const date = new Date(isoString);
-    // Simple readable format
     return date.toLocaleString();
   } catch {
     return isoString;
@@ -54,6 +51,7 @@ function renderTickets(tickets) {
 
   tickets.forEach((ticket) => {
     const row = document.createElement("tr");
+    row.classList.add("clickable-row");
 
     const idCell = document.createElement("td");
     idCell.textContent = ticket.ticketId || "";
@@ -84,6 +82,19 @@ function renderTickets(tickets) {
     const updatedCell = document.createElement("td");
     updatedCell.textContent = formatDate(ticket.updatedAt);
     row.appendChild(updatedCell);
+
+    // When you click a row, go to the ticket detail page.
+    row.addEventListener("click", () => {
+      const userId = userSelect.value || "customer_ashley";
+      const ticketId = ticket.ticketId;
+      if (!ticketId) return;
+
+      const url = `ticket-detail.html?ticketId=${encodeURIComponent(
+        ticketId
+      )}&userId=${encodeURIComponent(userId)}`;
+
+      window.location.href = url;
+    });
 
     ticketsTableBody.appendChild(row);
   });
@@ -133,7 +144,7 @@ loadTicketsBtn.addEventListener("click", () => {
   fetchTicketsForUser(userId);
 });
 
-// Optional: auto-load on first page open with default user
+// Auto-load on first page open with default user
 document.addEventListener("DOMContentLoaded", () => {
   const defaultUser = userSelect.value || "customer_ashley";
   fetchTicketsForUser(defaultUser);
