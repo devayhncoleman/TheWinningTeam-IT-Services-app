@@ -3,8 +3,7 @@
 // ==============================================
 
 // 1. Set your API base URL here.
-//    Make sure this matches what you use in PowerShell.
-const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com"; // <-- your real URL
+const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
 
 // 2. DOM elements
 const userSelect = document.getElementById("userSelect");
@@ -13,9 +12,7 @@ const ticketsTableBody = document.querySelector("#ticketsTable tbody");
 const statusMessage = document.getElementById("statusMessage");
 
 // 3. Helpers
-
 function setStatus(message, type = "info") {
-  // type can be "info", "success", "error"
   statusMessage.textContent = message || "";
   statusMessage.className = "status-message " + type;
 }
@@ -72,7 +69,8 @@ function renderTickets(tickets) {
     const emergencyCell = document.createElement("td");
     const isEmergencyFlag = ticket.isEmergency || "";
     const isEmergencyBool = ticket.isEmergencyBool;
-    emergencyCell.textContent = isEmergencyFlag || (isEmergencyBool ? "EMERGENCY" : "NORMAL");
+    emergencyCell.textContent =
+      isEmergencyFlag || (isEmergencyBool ? "EMERGENCY" : "NORMAL");
     row.appendChild(emergencyCell);
 
     const createdCell = document.createElement("td");
@@ -83,7 +81,7 @@ function renderTickets(tickets) {
     updatedCell.textContent = formatDate(ticket.updatedAt);
     row.appendChild(updatedCell);
 
-    // When you click a row, go to the ticket detail page.
+    // Click row -> ticket detail
     row.addEventListener("click", () => {
       const userId = userSelect.value || "customer_ashley";
       const ticketId = ticket.ticketId;
@@ -101,10 +99,12 @@ function renderTickets(tickets) {
 }
 
 // 4. API call
-
 async function fetchTicketsForUser(userId) {
   if (!API_BASE_URL || API_BASE_URL.includes("<your-api-id>")) {
-    setStatus("Please update API_BASE_URL in tickets.js with your real API Gateway URL.", "error");
+    setStatus(
+      "Please update API_BASE_URL in tickets.js with your real API Gateway URL.",
+      "error"
+    );
     return;
   }
 
@@ -122,7 +122,10 @@ async function fetchTicketsForUser(userId) {
     if (!response.ok) {
       const text = await response.text();
       console.error("Error response:", text);
-      setStatus(`Error loading tickets (${response.status}). Check console for details.`, "error");
+      setStatus(
+        `Error loading tickets (${response.status}). Check console for details.`,
+        "error"
+      );
       return;
     }
 
@@ -133,19 +136,22 @@ async function fetchTicketsForUser(userId) {
     setStatus(`Loaded ${items.length} ticket(s) for ${userId}.`, "success");
   } catch (err) {
     console.error("Fetch error:", err);
-    setStatus("Network or CORS error while loading tickets. See console for details.", "error");
+    setStatus(
+      "Network or CORS error while loading tickets. See console for details.",
+      "error"
+    );
   }
 }
 
 // 5. Event wiring
+if (loadTicketsBtn && userSelect) {
+  loadTicketsBtn.addEventListener("click", () => {
+    const userId = userSelect.value;
+    fetchTicketsForUser(userId);
+  });
 
-loadTicketsBtn.addEventListener("click", () => {
-  const userId = userSelect.value;
-  fetchTicketsForUser(userId);
-});
-
-// Auto-load on first page open with default user
-document.addEventListener("DOMContentLoaded", () => {
-  const defaultUser = userSelect.value || "customer_ashley";
-  fetchTicketsForUser(defaultUser);
-});
+  document.addEventListener("DOMContentLoaded", () => {
+    const defaultUser = userSelect.value || "customer_ashley";
+    fetchTicketsForUser(defaultUser);
+  });
+}
