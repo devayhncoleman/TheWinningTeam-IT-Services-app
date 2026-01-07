@@ -1,49 +1,45 @@
-/* =========================================
+/* =========================
    Global Theme Tokens
-   ========================================= */
-
+   ========================= */
 :root {
-  /* Day mode (purple + gold) */
-  --bg-main-day: #090014;
+  /* Day mode (royal purple + gold) */
+  --bg-main-day: #070017;
   --bg-elevated-day: rgba(24, 0, 60, 0.96);
   --bg-subtle-day: rgba(36, 0, 90, 0.85);
 
   /* Night mode (royal blue) */
   --bg-main-night: #020617;
   --bg-elevated-night: rgba(15, 23, 42, 0.96);
-  --bg-subtle-night: rgba(15, 23, 42, 0.85);
+  --bg-subtle-night: rgba(15, 23, 42, 0.9);
 
   /* Accents */
   --accent-purple: #8b5cf6;
   --accent-purple-soft: rgba(139, 92, 246, 0.35);
   --accent-blue: #1d4ed8;
+  --accent-blue-soft: rgba(37, 99, 235, 0.25);
   --accent-gold: #fbbf24;
   --accent-gold-soft: rgba(251, 191, 36, 0.24);
 
+  /* Text & border */
   --text-main: #f9fafb;
   --text-muted: #9ca3af;
-  --text-soft: rgba(156, 163, 175, 0.9);
+  --text-soft: rgba(156, 163, 175, 0.95);
 
   --border-subtle: rgba(148, 163, 184, 0.16);
 
   --shadow-soft: 0 22px 40px rgba(0, 0, 0, 0.65);
-  --radius-lg: 0.9rem;
-  --radius-xl: 1.3rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
-    "SF Pro Text", "Segoe UI", sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text",
+    "Segoe UI", sans-serif;
   --font-display: "Playfair Display", "Times New Roman", serif;
 }
 
-/* =========================================
-   Base Layout
-   ========================================= */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* =========================
+   Page Shell – “Royal Hall”
+   ========================= */
 
 html,
 body {
@@ -55,313 +51,615 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Default: day mode (purple) */
+/* Day = purple hall */
 body {
   display: flex;
   justify-content: center;
-  background: radial-gradient(circle at top, #321061 0%, var(--bg-main-day) 55%, #000 100%);
+  background:
+    radial-gradient(circle at top, #35105f 0%, var(--bg-main-day) 55%, #000 100%);
 }
 
-/* Night mode (royal blue) */
 body.night-mode {
-  background: radial-gradient(circle at top, #172554 0%, var(--bg-main-night) 55%, #020617 100%);
+  /* Night = royal blue hall */
+  background:
+    radial-gradient(circle at top, #1e3a8a 0%, var(--bg-main-night) 55%, #020617 100%);
 }
 
 .page-shell {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: 1.5rem 0;
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  padding: 2.5rem 1.5rem 2rem;
 }
 
+/* “Museum wall” background */
 .page-accent {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.18) 0, transparent 55%),
-    radial-gradient(circle at 90% 100%, rgba(56, 189, 248, 0.18) 0, transparent 50%);
-  opacity: 0.85;
-  z-index: 0;
+    radial-gradient(circle at 15% 15%, rgba(251, 191, 36, 0.08), transparent 55%),
+    radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.12), transparent 55%),
+    radial-gradient(circle at 10% 85%, rgba(139, 92, 246, 0.08), transparent 55%);
+  opacity: 0.9;
 }
 
+/* Main card = “exhibit room” */
 .page-main {
   position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 1120px;
-  margin: 2.5rem auto 1.5rem;
+  max-width: 1160px;
+  margin: 0 auto;
   background: linear-gradient(135deg, var(--bg-elevated-day), #050013);
-  border-radius: 1.6rem;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(148, 163, 184, 0.32);
   box-shadow: var(--shadow-soft);
-  padding: 2rem 2.5rem 1.75rem;
-  backdrop-filter: blur(28px);
+  padding: 2.25rem 2.6rem 1.8rem;
+  backdrop-filter: blur(26px);
 }
 
-/* Night mode container adjustments */
 body.night-mode .page-main {
   background: linear-gradient(135deg, var(--bg-elevated-night), #020617);
-  border-color: rgba(37, 99, 235, 0.45);
+  border-color: rgba(37, 99, 235, 0.5);
 }
 
-/* Generic typography */
+/* Light vertical “pillars” like a gallery */
+.page-main::before,
+.page-main::after {
+  content: "";
+  position: absolute;
+  top: 1.6rem;
+  bottom: 1.6rem;
+  width: 2px;
+  border-radius: 999px;
+  opacity: 0.35;
+}
 
+.page-main::before {
+  left: 1.4rem;
+  background: linear-gradient(to bottom, rgba(251, 191, 36, 0.45), transparent);
+}
+
+.page-main::after {
+  right: 1.4rem;
+  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), transparent);
+}
+
+/* =========================
+   Typography
+   ========================= */
 h1,
 h2,
 h3,
 h4 {
-  margin: 0;
-  font-family: var(--font-display);
-  letter-spacing: 0.05em;
+  margin: 0 0 0.4rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 h1 {
-  font-size: 1.9rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
 }
 
 h2 {
-  font-size: 1.4rem;
-  margin-bottom: 0.75rem;
+  font-size: 1.35rem;
 }
 
 h3 {
   font-size: 1.1rem;
-  margin-bottom: 0.25rem;
 }
 
 p {
-  margin: 0.2rem 0 0.55rem;
-  line-height: 1.45;
-  color: var(--text-soft);
-}
-
-a {
-  color: var(--accent-gold);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
+  margin: 0.2rem 0;
+  line-height: 1.6;
 }
 
 .mini {
   font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-/* =========================================
-   Header + Hero (index + showcase)
-   ========================================= */
-
-.gallery-header,
-.site-header {
-  border-radius: 1.2rem;
-  padding: 1.5rem 1.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: linear-gradient(120deg, rgba(15, 23, 42, 0.96), rgba(31, 41, 55, 0.96));
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-
-body.night-mode .site-header,
-body.night-mode .gallery-header {
-  background: linear-gradient(120deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0.98));
-  border-color: rgba(59, 130, 246, 0.5);
-}
-
-.header-left {
-  max-width: 60%;
-}
-
-.header-right {
-  max-width: 32%;
-  text-align: right;
-}
-
-.tagline {
-  font-size: 0.95rem;
   color: var(--text-soft);
 }
 
-.header-note {
-  text-align: right;
+/* =========================
+   Shared layout blocks
+   ========================= */
+
+.page-content {
+  margin-top: 1.6rem;
 }
 
-/* Resume hero metrics */
+.section {
+  margin-bottom: 1.9rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+/* =========================
+   Top “nameplate” header
+   ========================= */
+
+.gallery-header,
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.2rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.09), transparent 55%),
+    linear-gradient(120deg, rgba(12, 10, 43, 0.96), rgba(24, 0, 60, 0.98));
+  margin-bottom: 1.4rem;
+}
+
+body.night-mode .gallery-header,
+body.night-mode .site-header {
+  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 55%),
+    linear-gradient(120deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+}
+
+.header-left {
+  flex: 1.4;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.tagline {
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
 
 .availability-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.9rem;
+  display: inline-block;
+  margin-top: 0.55rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(52, 211, 153, 0.5);
-  font-size: 0.78rem;
-  color: #a7f3d0;
-  margin: 0.4rem 0 0.9rem;
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.05));
+  font-size: 0.8rem;
 }
 
-.header-meta p {
-  margin: 0.1rem 0;
+.header-meta {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
 }
 
 .metrics-bar {
   display: flex;
-  gap: 0.75rem;
+  gap: 1.1rem;
   margin-top: 0.9rem;
 }
 
 .metric {
-  padding: 0.4rem 0.7rem;
-  border-radius: 0.7rem;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.09), transparent 60%);
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
+  background: radial-gradient(circle at top, rgba(148, 163, 184, 0.22), transparent 65%);
 }
 
 .metric-value {
   display: block;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-top: 0.2rem;
 }
 
-/* =========================================
-   Header Actions (buttons row, audio, etc.)
-   ========================================= */
+/* =========================
+   Header actions bar
+   ========================= */
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0.75rem 0 1.1rem;
-  gap: 1rem;
-  flex-wrap: wrap;
+  margin: 1.1rem 0 1.4rem;
+  gap: 1.5rem;
 }
 
 .header-actions-left,
 .header-actions-right {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
   flex-wrap: wrap;
+  gap: 0.7rem;
 }
 
-/* Buttons */
+/* =========================
+   Buttons & chips
+   ========================= */
 
 button {
-  border: none;
   border-radius: 999px;
-  padding: 0.45rem 0.95rem;
-  font-size: 0.82rem;
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  color: #111827;
+  font-size: 0.8rem;
   font-weight: 500;
+  padding: 0.4rem 0.9rem;
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(55, 65, 81, 0.95), rgba(31, 41, 55, 0.95));
-  color: #f9fafb;
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out,
+    background 0.12s ease-out,
+    border-color 0.12s ease-out;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+}
+
+button.primary-cta {
+  padding-inline: 1.1rem;
+  background: linear-gradient(120deg, #fbbf24, #f97316);
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
-  background: linear-gradient(135deg, rgba(75, 85, 99, 0.95), rgba(31, 41, 55, 1));
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.7);
+  border-color: #facc15;
 }
 
 button:active {
   transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65);
+}
+
+/* Smaller “chip” buttons */
+.chip-row {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.6);
+  color: var(--text-soft);
+  padding: 0.3rem 0.8rem;
   box-shadow: none;
 }
 
-.primary-cta,
-.header-actions button:first-of-type {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  color: #111827;
+.chip:hover {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fefce8;
 }
 
-.primary-cta:hover,
-.header-actions button:first-of-type:hover {
-  background: linear-gradient(135deg, #f97316, #facc15);
-}
-
-/* Volume slider */
+/* =========================
+   Volume control
+   ========================= */
 
 .vol {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: var(--text-soft);
 }
 
-#musicVol {
-  width: 120px;
+.vol input[type="range"] {
+  accent-color: #facc15;
 }
 
-/* =========================================
+/* =========================
    Nav
-   ========================================= */
+   ========================= */
 
-nav {
-  margin-bottom: 1rem;
+.nav-inner {
+  margin-bottom: 1.4rem;
 }
 
 .nav-inner ul {
   list-style: none;
-  display: flex;
-  gap: 1.25rem;
   padding: 0;
   margin: 0;
-  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 }
 
 .nav-inner a {
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(15, 23, 42, 0.55);
 }
 
 .nav-inner a:hover {
-  color: var(--accent-gold);
+  border-color: rgba(251, 191, 36, 0.75);
 }
 
-/* Site header nav (tickets pages) */
+/* =========================
+   Lists & bullets
+   ========================= */
 
-.site-title {
-  font-size: 1.2rem;
+.bullets {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
 }
 
-.site-nav {
+.bullets li {
+  margin-bottom: 0.35rem;
+}
+
+/* =========================
+   Fun panel & mini game
+   ========================= */
+
+.fun-panel {
+  margin-top: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 70%),
+    rgba(15, 23, 42, 0.9);
+}
+
+.cta-row {
+  margin-top: 0.6rem;
   display: flex;
-  gap: 1rem;
-  font-size: 0.82rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
-.site-nav a {
-  color: var(--text-muted);
+.mini-game {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.85);
 }
 
-.site-nav a.active,
-.site-nav a:hover {
-  color: var(--accent-gold);
+/* =========================
+   Gallery cards (Showcase)
+   ========================= */
+
+.gallery-intro {
+  margin-bottom: 0.8rem;
 }
 
-/* =========================================
-   Sections / Layout
-   ========================================= */
-
-.page-content {
-  margin-top: 0.5rem;
-}
-
-.section {
-  margin-bottom: 1.5rem;
-}
-
-.section:last-of-type {
-  margin-bottom: 1rem;
-}
-
-.two-column {
+.gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr))
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+
+.gallery-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: radial-gradient(circle at top, rgba(139, 92, 246, 0.16), transparent 60%),
+    rgba(15, 23, 42, 0.96);
+  padding: 0.9rem 1.05rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 190px;
+}
+
+.gallery-frame {
+  margin-bottom: 0.6rem;
+}
+
+.gallery-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.7);
+  background: rgba(251, 191, 36, 0.12);
+  margin-bottom: 0.45rem;
+}
+
+.gallery-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+/* =========================
+   Ticket Dashboard Table
+   ========================= */
+
+.table-wrapper {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.92);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+thead {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.28), rgba(15, 23, 42, 0.98));
+}
+
+th,
+td {
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+tbody tr:nth-child(odd) {
+  background: rgba(9, 9, 24, 0.95);
+}
+
+tbody tr:hover {
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+/* =========================
+   Ticket Detail View
+   ========================= */
+
+.ticket-meta {
+  margin-top: 0.7rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.15), transparent 60%),
+    rgba(15, 23, 42, 0.96);
+}
+
+.ticket-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.8rem 1.2rem;
+  font-size: 0.83rem;
+}
+
+.ticket-meta-grid h4 {
+  margin-bottom: 0.5rem;
+}
+
+.messages-list {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message-item {
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.95);
+  font-size: 0.8rem;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--text-soft);
+}
+
+.message-role {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+}
+
+.message-body {
+  color: var(--text-main);
+}
+
+.message-system-tag {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(251, 191, 36, 0.85);
+}
+
+.message-composer {
+  margin-top: 0.9rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(15, 23, 42, 0.98);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.message-composer textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  padding: 0.5rem 0.6rem;
+  background: rgba(9, 9, 24, 0.95);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+}
+
+.message-composer textarea::placeholder {
+  color: rgba(148, 163, 184, 0.7);
+}
+
+/* =========================
+   Status messages
+   ========================= */
+
+.status-message {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.status-message.success {
+  color: #22c55e;
+}
+
+.status-message.error {
+  color: #f97373;
+}
+
+/* =========================
+   Footer
+   ========================= */
+
+.site-footer {
+  margin-top: 1.4rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+/* =========================
+   Responsive tweaks
+   ========================= */
+
+@media (max-width: 768px) {
+  .page-main {
+    padding: 1.6rem 1.3rem 1.4rem;
+  }
+
+  .gallery-header,
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 1.1rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metrics-bar {
+    flex-wrap: wrap;
+  }
+}
