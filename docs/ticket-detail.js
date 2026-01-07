@@ -4,6 +4,7 @@
 
 // Keep this in sync with tickets.js
 const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
+const MAX_MESSAGE_LENGTH = 1200; // browser-side limit
 
 // DOM elements
 const ticketMeta = document.getElementById("ticketMeta");
@@ -53,7 +54,9 @@ function renderTicketMeta(ticket) {
       <div>
         <p><strong>Status:</strong> ${ticket.status || ""}</p>
         <p><strong>Priority:</strong> ${ticket.priority || ""}</p>
-        <p><strong>Emergency:</strong> ${ticket.isEmergency || (ticket.isEmergencyBool ? "EMERGENCY" : "NORMAL")}</p>
+        <p><strong>Emergency:</strong> ${
+          ticket.isEmergency || (ticket.isEmergencyBool ? "EMERGENCY" : "NORMAL")
+        }</p>
       </div>
       <div>
         <p><strong>Created By:</strong> ${ticket.createdByUserId || ""}</p>
@@ -73,7 +76,8 @@ function renderMessages(messages) {
   messagesList.innerHTML = "";
 
   if (!messages || messages.length === 0) {
-    messagesList.innerHTML = '<p class="small-note">No messages yet on this ticket.</p>';
+    messagesList.innerHTML =
+      '<p class="small-note">No messages yet on this ticket.</p>';
     return;
   }
 
@@ -81,17 +85,19 @@ function renderMessages(messages) {
     const div = document.createElement("div");
     div.classList.add("message-item");
 
+    // Match Lambda fields:
+    // senderId, senderRole, timestamp, messageText
     const roleLabel = m.senderRole || "USER";
-    const timeLabel = formatDate(m.messageTimestamp);
+    const timeLabel = formatDate(m.timestamp);
 
     div.innerHTML = `
       <div class="message-header">
         <span class="message-role">${roleLabel}</span>
-        <span class="message-sender">${m.senderUserId || ""}</span>
+        <span class="message-sender">${m.senderId || ""}</span>
         <span class="message-time">${timeLabel}</span>
       </div>
       <div class="message-body">
-        ${m.content || ""}
+        ${m.messageText || ""}
       </div>
       ${m.isSystem ? '<div class="message-system-tag">System</div>' : ""}
     `;
@@ -132,28 +138,38 @@ async function loadTicketAndMessages() {
     renderTicketMeta(ticket);
 
     // 2) Load messages
-    const msgResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
-      method: "GET",
-      headers: {
-        "x-user-id": userId
+    const msgResp = await fetch(
+      `${API_BASE_URL}/tickets/${ticketId}/messages`,
+      {
+        method: "GET",
+        headers: {
+          "x-user-id": userId
+        }
       }
-    });
+    );
 
     if (!msgResp.ok) {
       const text = await msgResp.text();
       console.error("Messages error:", text);
-      setDetailStatus(`Loaded ticket, but error loading messages (${msgResp.status}).`, "error");
+      setDetailStatus(
+        `Loaded ticket, but error loading messages (${msgResp.status}).`,
+        "error"
+      );
       return;
     }
 
     const msgData = await msgResp.json();
-    const items = Array.isArray(msgData.items) ? msgData.items : [];
+    // Lambda returns: { ticketId, messages: [...] }
+    const items = Array.isArray(msgData.messages) ? msgData.messages : [];
 
     renderMessages(items);
     setDetailStatus("Ticket and messages loaded.", "success");
   } catch (err) {
     console.error("Detail fetch error:", err);
-    setDetailStatus("Network or CORS error while loading ticket detail.", "error");
+    setDetailStatus(
+      "Network or CORS error while loading ticket detail.",
+      "error"
+    );
   }
 }
 
@@ -166,16 +182,30 @@ async function sendMessage() {
     return;
   }
 
+  if (content.length > MAX_MESSAGE_LENGTH) {
+    setDetailStatus(
+      `Message too long (max ${MAX_MESSAGE_LENGTH} characters).`,
+      "error"
+    );
+    return;
+  }
+
   setDetailStatus("Sending message...", "info");
 
   try {
+    // IMPORTANT: backend expects "messageText"
     const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-user-id": userId
       },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({
+        messageText: content
+        // You *can* also send senderId/senderRole if you want to override:
+        // senderId: userId,
+        // senderRole: "customer"
+      })
     });
 
     if (!resp.ok) {
@@ -191,12 +221,18 @@ async function sendMessage() {
     await loadTicketAndMessages();
   } catch (err) {
     console.error("Send message network error:", err);
-    setDetailStatus("Network or CORS error while sending message.", "error");
+    setDetailStatus(
+      "Network or CORS error while sending message.",
+      "error"
+    );
   }
 }
 
 // Wiring
 document.addEventListener("DOMContentLoaded", () => {
+  if (messageInput) {
+    messageInput.maxLength = MAX_MESSAGE_LENGTH;
+  }
   loadTicketAndMessages();
 });
 
