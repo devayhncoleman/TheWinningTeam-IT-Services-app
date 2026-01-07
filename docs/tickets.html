@@ -5,7 +5,7 @@
   <title>The Winning Team – Ticket Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Executive Fonts -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -13,17 +13,14 @@
     rel="stylesheet"
   >
 
-  <!-- Global Styling -->
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div class="page-shell">
     <div class="page-accent"></div>
 
     <div class="page-main">
-
-      <!-- ================= HEADER ================= -->
+      <!-- HEADER -->
       <header class="site-header">
         <div class="header-inner">
           <h1 class="site-title">The Winning Team — Ticketing System</h1>
@@ -36,10 +33,9 @@
         </div>
       </header>
 
-      <!-- ================= CONTENT ================= -->
+      <!-- CONTENT -->
       <main class="page-content">
 
-        <!-- Intro / context -->
         <section class="section">
           <h2>Customer Ticket Dashboard</h2>
           <p>
@@ -48,18 +44,15 @@
           </p>
         </section>
 
-        <!-- Dev mode selector -->
         <section class="section">
           <h3>Act As (Dev Mode)</h3>
-
-          <p class="small-note">
+          <p class="small-note mini">
             For now, we use a header called <code>x-user-id</code> to pretend to be different users.
             Later this will use real login via Cognito.
           </p>
 
           <div class="user-selector">
             <label for="userSelect">Choose user:</label>
-
             <select id="userSelect">
               <option value="customer_ashley">Customer – Ashley</option>
               <option value="tech_mike">Tech – Mike</option>
@@ -72,7 +65,6 @@
           <div id="statusMessage" class="status-message"></div>
         </section>
 
-        <!-- Ticket list -->
         <section class="section">
           <h3>Tickets</h3>
 
@@ -89,25 +81,21 @@
                   <th>Updated</th>
                 </tr>
               </thead>
-
               <tbody>
                 <!-- Filled by tickets.js -->
               </tbody>
             </table>
           </div>
         </section>
-
       </main>
 
-      <!-- ================= FOOTER ================= -->
+      <!-- FOOTER -->
       <footer class="site-footer">
         <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
       </footer>
-
     </div>
   </div>
 
   <script src="tickets.js"></script>
 </body>
 </html>
-
