@@ -1,143 +1,178 @@
-// ==============================================
-// Global UI Script
-// ==============================================
+// =========================
+// Theme toggle (day / night)
+// =========================
 
-// Night Shift Mode (day = purple, night = royal blue)
+const THEME_KEY = "twt_theme_mode";
+
+function applyTheme(mode) {
+  if (mode === "night") {
+    document.body.classList.add("night-mode");
+  } else {
+    document.body.classList.remove("night-mode");
+  }
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === "night") {
+    applyTheme("night");
+  } else {
+    applyTheme("day");
+  }
+})();
+
 const toggleNightShiftBtn = document.getElementById("toggleNightShift");
 
 if (toggleNightShiftBtn) {
   toggleNightShiftBtn.addEventListener("click", () => {
-    document.body.classList.toggle("night-mode");
+    const isNight = document.body.classList.contains("night-mode");
+    const next = isNight ? "day" : "night";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
   });
 }
 
-// Music controls
+// =========================
+// Background music controls
+// =========================
+
 const musicToggle = document.getElementById("musicToggle");
 const musicVol = document.getElementById("musicVol");
 const bgMusic = document.getElementById("bgMusic");
 const alertSound = document.getElementById("alertSound");
 
-if (bgMusic && musicToggle) {
-  let isPlaying = false;
-
+if (musicToggle && bgMusic) {
   musicToggle.addEventListener("click", () => {
-    if (!isPlaying) {
-      bgMusic.loop = true;
-      bgMusic.play().catch((err) => console.warn("Music play blocked:", err));
-      isPlaying = true;
+    if (bgMusic.paused) {
+      bgMusic.play().catch(() => {});
       musicToggle.textContent = "Pause music 🎵";
     } else {
       bgMusic.pause();
-      isPlaying = false;
       musicToggle.textContent = "Play music 🎵";
     }
   });
-
-  if (musicVol) {
-    musicVol.addEventListener("input", (e) => {
-      bgMusic.volume = Number(e.target.value);
-    });
-  }
 }
 
-// Hire Me button
-const hireMeBtn = document.getElementById("hireMeBtn");
-if (hireMeBtn) {
-  hireMeBtn.addEventListener("click", () => {
-    window.location.href = "mailto:devayhncoleman@gmail.com?subject=Role%20Inquiry%20-%20NOC%20/%20Cloud%20Ops";
+if (musicVol && bgMusic) {
+  musicVol.addEventListener("input", () => {
+    bgMusic.volume = parseFloat(musicVol.value || "0.25");
   });
 }
 
-// Fun "Status" panel on index
+// =========================
+// Landing page fun bits
+// =========================
+
+const hireMeBtn = document.getElementById("hireMeBtn");
+if (hireMeBtn) {
+  hireMeBtn.addEventListener("click", () => {
+    const contact = [
+      "DeVayhn (Devayjah) Coleman",
+      "Austin, TX",
+      "Phone: (510) 934-7112",
+      "LinkedIn: linkedin.com/in/devayhn-coleman-788411223"
+    ].join("\n");
+    navigator.clipboard?.writeText(contact).catch(() => {});
+    alert("Contact info copied. Looking forward to hearing from you.");
+  });
+}
+
 const statusLine = document.getElementById("statusLine");
 const simulateAlertBtn = document.getElementById("simulateAlertBtn");
 const calmDownBtn = document.getElementById("calmDownBtn");
 
 if (simulateAlertBtn && statusLine) {
   simulateAlertBtn.addEventListener("click", () => {
-    statusLine.textContent = "High priority alert detected. Investigating logs and impact…";
-    if (alertSound) {
-      alertSound.currentTime = 0;
-      alertSound.play().catch(() => {});
-    }
+    statusLine.textContent = "Incident detected: elevated error rates in production. Triaging…";
+    alertSound?.play().catch(() => {});
   });
 }
 
 if (calmDownBtn && statusLine) {
   calmDownBtn.addEventListener("click", () => {
-    statusLine.textContent = "Incident resolved. Documented, closed, and ready for the next shift.";
+    statusLine.textContent = "Status: Standing by for alerts…";
   });
 }
 
-// Mini RCA game
+// RCA mini-game
+
 const rcaGenBtn = document.getElementById("rcaGenBtn");
-const rcaPrompt = document.getElementById("rcaPrompt");
 const rcaA = document.getElementById("rcaA");
 const rcaB = document.getElementById("rcaB");
 const rcaC = document.getElementById("rcaC");
+const rcaPrompt = document.getElementById("rcaPrompt");
 const rcaFeedback = document.getElementById("rcaFeedback");
 
-const incidents = [
-  "Service latency spike reported on customer portal.",
-  "Multiple failed logins from a single IP address.",
-  "Disk usage on a critical server is at 92%.",
+const INCIDENTS = [
+  {
+    text: "Alert: Web app latency spike detected on one node.",
+    answer: "C"
+  },
+  {
+    text: "Alert: DNS failures from one branch office.",
+    answer: "A"
+  },
+  {
+    text: "Alert: Multiple authentication failures from a single account.",
+    answer: "C"
+  }
 ];
 
-if (rcaGenBtn && rcaPrompt && rcaA && rcaB && rcaC && rcaFeedback) {
+if (rcaGenBtn && rcaPrompt && rcaFeedback) {
   rcaGenBtn.addEventListener("click", () => {
-    const pick = incidents[Math.floor(Math.random() * incidents.length)];
-    rcaPrompt.textContent = pick;
-    rcaFeedback.textContent = "Which next step would you take?";
+    const idx = Math.floor(Math.random() * INCIDENTS.length);
+    const incident = INCIDENTS[idx];
+    rcaPrompt.textContent = incident.text;
+    rcaPrompt.dataset.correct = incident.answer;
+    rcaFeedback.textContent = "";
   });
 
-  rcaA.addEventListener("click", () => {
-    rcaFeedback.textContent = "Good first move. Logs give you evidence before touching systems.";
-  });
+  function handleRca(choice) {
+    const correct = rcaPrompt.dataset.correct;
+    if (!correct) return;
+    if (choice === correct) {
+      rcaFeedback.textContent = "Correct: observe, gather evidence, then escalate with context.";
+    } else if (choice === "B") {
+      rcaFeedback.textContent = "Restarting everything is risky. Check logs and confirm first.";
+    } else {
+      rcaFeedback.textContent = "Logs help, but you still want to escalate with evidence and impact.";
+    }
+  }
 
-  rcaB.addEventListener("click", () => {
-    rcaFeedback.textContent = "Restarting everything is risky. You’d want more data before doing that.";
-  });
-
-  rcaC.addEventListener("click", () => {
-    rcaFeedback.textContent =
-      "Escalating with evidence is strong, but make sure you’ve at least checked logs and basic health first.";
-  });
+  rcaA?.addEventListener("click", () => handleRca("A"));
+  rcaB?.addEventListener("click", () => handleRca("B"));
+  rcaC?.addEventListener("click", () => handleRca("C"));
 }
 
-// Copy bullets (experience section)
+// Copy helpers
+
 const copyBulletsBtn = document.getElementById("copyBulletsBtn");
 if (copyBulletsBtn) {
   copyBulletsBtn.addEventListener("click", () => {
-    const bullets = document.querySelector("#experience .bullets");
-    if (!bullets) return;
-    const text = Array.from(bullets.querySelectorAll("li"))
-      .map((li) => "• " + li.textContent.trim())
+    const experienceSection = document.getElementById("experience");
+    if (!experienceSection) return;
+    const bullets = experienceSection.querySelectorAll("li");
+    const text = Array.from(bullets)
+      .map((li) => "- " + li.textContent.trim())
       .join("\n");
-
-    navigator.clipboard.writeText(text).then(
-      () => alert("Experience bullets copied to clipboard."),
-      () => alert("Could not copy bullets.")
-    );
+    navigator.clipboard?.writeText(text).catch(() => {});
+    alert("Experience bullets copied.");
   });
 }
 
-// Copy contact info
 const copyContactBtn = document.getElementById("copyContactBtn");
 if (copyContactBtn) {
   copyContactBtn.addEventListener("click", () => {
     const text =
       "DeVayhn (Devayjah) Coleman\nAustin, TX\nPhone: (510) 934-7112\nLinkedIn: linkedin.com/in/devayhn-coleman-788411223\nGitHub: github.com/devayhncoleman";
-    navigator.clipboard.writeText(text).then(
-      () => alert("Contact info copied."),
-      () => alert("Could not copy contact info.")
-    );
+    navigator.clipboard?.writeText(text).catch(() => {});
+    alert("Contact info copied.");
   });
 }
 
-// Panic button (for fun)
 const panicBtn = document.getElementById("panicBtn");
 if (panicBtn) {
   panicBtn.addEventListener("click", () => {
-    alert("Deep breath. Step 1: Check impact. Step 2: Check logs. Step 3: Communicate clearly. You got this.");
+    alert("Deep breath. Triage, document, escalate with context. You’ve got this.");
   });
 }
