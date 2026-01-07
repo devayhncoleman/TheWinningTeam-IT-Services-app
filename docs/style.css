@@ -655,3 +655,97 @@ html.boss-mode .gallery-header {
 html.boss-mode section h2 {
   color: #ffdd7e;
 }
+
+.site-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.site-nav a {
+  margin-left: 1rem;
+  text-decoration: none;
+}
+
+.site-nav a.active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.page-content {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.user-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-message {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.status-message.info {
+  opacity: 0.8;
+}
+
+.status-message.success {
+  color: #00c851;
+}
+
+.status-message.error {
+  color: #ff4444;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+#ticketsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+#ticketsTable th,
+#ticketsTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.small-note {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
