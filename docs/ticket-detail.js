@@ -4,7 +4,7 @@
 
 // Keep this in sync with tickets.js
 const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
-const MAX_MESSAGE_LENGTH = 1200; // browser-side limit
+const MAX_MESSAGE_LENGTH = 1200;
 
 // DOM elements
 const ticketMeta = document.getElementById("ticketMeta");
@@ -13,7 +13,7 @@ const messageInput = document.getElementById("messageInput");
 const sendMessageBtn = document.getElementById("sendMessageBtn");
 const detailStatus = document.getElementById("detailStatus");
 
-// Parse query string: ?ticketId=...&userId=...
+// Parse query: ?ticketId=...&userId=...
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -77,7 +77,7 @@ function renderMessages(messages) {
 
   if (!messages || messages.length === 0) {
     messagesList.innerHTML =
-      '<p class="small-note">No messages yet on this ticket.</p>';
+      '<p class="small-note mini">No messages yet on this ticket.</p>';
     return;
   }
 
@@ -85,8 +85,6 @@ function renderMessages(messages) {
     const div = document.createElement("div");
     div.classList.add("message-item");
 
-    // Match Lambda fields:
-    // senderId, senderRole, timestamp, messageText
     const roleLabel = m.senderRole || "USER";
     const timeLabel = formatDate(m.timestamp);
 
@@ -106,7 +104,7 @@ function renderMessages(messages) {
   });
 }
 
-// API calls
+// Load ticket + messages
 async function loadTicketAndMessages() {
   const { ticketId, userId } = getQueryParams();
 
@@ -118,7 +116,7 @@ async function loadTicketAndMessages() {
   setDetailStatus("Loading ticket...", "info");
 
   try {
-    // 1) Load ticket
+    // Ticket
     const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       method: "GET",
       headers: {
@@ -137,7 +135,7 @@ async function loadTicketAndMessages() {
     const ticket = await ticketResp.json();
     renderTicketMeta(ticket);
 
-    // 2) Load messages
+    // Messages
     const msgResp = await fetch(
       `${API_BASE_URL}/tickets/${ticketId}/messages`,
       {
@@ -159,7 +157,6 @@ async function loadTicketAndMessages() {
     }
 
     const msgData = await msgResp.json();
-    // Lambda returns: { ticketId, messages: [...] }
     const items = Array.isArray(msgData.messages) ? msgData.messages : [];
 
     renderMessages(items);
@@ -173,6 +170,7 @@ async function loadTicketAndMessages() {
   }
 }
 
+// Send message
 async function sendMessage() {
   const { ticketId, userId } = getQueryParams();
   const content = messageInput.value.trim();
@@ -193,7 +191,6 @@ async function sendMessage() {
   setDetailStatus("Sending message...", "info");
 
   try {
-    // IMPORTANT: backend expects "messageText"
     const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
       method: "POST",
       headers: {
@@ -202,9 +199,6 @@ async function sendMessage() {
       },
       body: JSON.stringify({
         messageText: content
-        // You *can* also send senderId/senderRole if you want to override:
-        // senderId: userId,
-        // senderRole: "customer"
       })
     });
 
@@ -215,7 +209,6 @@ async function sendMessage() {
       return;
     }
 
-    // Clear input and reload messages
     messageInput.value = "";
     setDetailStatus("Message sent.", "success");
     await loadTicketAndMessages();
@@ -236,4 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadTicketAndMessages();
 });
 
-sendMessageBtn.addEventListener("click", sendMessage);
+if (sendMessageBtn) {
+  sendMessageBtn.addEventListener("click", sendMessage);
+}
