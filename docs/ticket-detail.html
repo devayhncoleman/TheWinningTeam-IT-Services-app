@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Winning Team – Ticket Detail</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">The Winning Team – Ticket Detail</h1>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="Showcase.html">Showcase</a>
+        <a href="tickets.html">Ticket App</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <section class="section">
+      <h2>Ticket Overview</h2>
+      <p class="small-note">
+        This page loads a single ticket and its message history from the live AWS backend.
+      </p>
+
+      <div id="ticketMeta" class="ticket-meta">
+        <!-- Filled by ticket-detail.js -->
+        <p>Loading ticket details...</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Messages</h3>
+      <div id="messagesList" class="messages-list">
+        <!-- Filled by ticket-detail.js -->
+      </div>
+
+      <div class="message-composer">
+        <label for="messageInput">Add a message</label>
+        <textarea id="messageInput" rows="3" placeholder="Type your message here..."></textarea>
+        <button id="sendMessageBtn" type="button">Send Message</button>
+        <div id="detailStatus" class="status-message"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built by The Winning Team – Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
+  </footer>
+
+  <script src="ticket-detail.js"></script>
+</body>
+</html>
