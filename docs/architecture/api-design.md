@@ -180,5 +180,462 @@ The backend helper `get_current_user()` will:
 
 ### 5.4 Ticket Message
 
+**DynamoDB Table:** `TicketMessages`
+**Partition key:** `ticketId`
+**Sort key:** `messageTimestamp`
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "messageTimestamp": "2026-01-05T20:20:01Z",
+  "senderUserId": "customer_ashley",
+  "senderRole": "CUSTOMER",
+  "content": "Here is a screenshot of the error.",
+  "isSystem": false
+}
+```
 
+## 6. Endponts
 
+### 6.1 Tickets
+
+#### 6.1.1 Create Ticket
+**Method:** `POST`
+**Route:** `/tickets`
+**Auth:** `Required(header based or future JWT)`
+**Roles:** `CUSTOMER,TECH,ADMIN`
+
+**Headers:**
+**Content-Type:** `application/json`
+**x-user-id:** `<userId>` ### (dev/demo) - optional once JWT is in place
+
+**Request Body:**
+```json
+{
+  "title": "VPN not connecting",
+  "description": "I cannot connect to the corporate VPN from home.",
+  "priority": "HIGH",          // optional, defaults to NORMAL
+  "isEmergency": "EMERGENCY"   // optional, NORMAL | EMERGENCY
+}
+```
+**Response 201 Created:**
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "title": "VPN not connecting",
+  "description": "I cannot connect to the corporate VPN from home.",
+  "status": "OPEN",
+  "priority": "HIGH",
+  "isEmergency": "EMERGENCY",
+  "isEmergencyBool": true,
+  "createdByUserId": "customer_ashley",
+  "assignedTechId": null,
+  "assignedGroupId": null,
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T20:15:30Z"
+}
+```
+**Error Responses:**
+`400 INVALID_REQUEST` **- missing title/description**
+`401 UNAUTHENTICATED` **- no valid identity**
+`500 INTERNAL_ERROR` **unexepected error**
+
+### 6.1.2 List My Tickets
+**Method:** `GET`
+**Route:** `/tickets`
+**Auth:** `Required`
+**Roles:**
+CUSTOMER → tickets created by that user
+
+TECH → tickets assigned to that tech or their groups (depending on implementation)
+
+ADMIN → all tickets, or this route may still be “my tickets” only
+
+Query Parameters (optional, future-friendly):
+
+status – filter by status
+
+isEmergency – NORMAL or EMERGENCY
+
+limit – max number to return (e.g., default 50)
+
+cursor – pagination token (if implemented)
+
+**Response 200 OK:**
+```json
+{
+  "items": [
+    {
+      "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+      "title": "VPN not connecting",
+      "status": "OPEN",
+      "priority": "HIGH",
+      "isEmergency": "EMERGENCY",
+      "isEmergencyBool": true,
+      "createdByUserId": "customer_ashley",
+      "assignedTechId": "tech_mike",
+      "assignedGroupId": "group_level_1",
+      "createdAt": "2026-01-05T20:15:30Z",
+      "updatedAt": "2026-01-05T21:02:10Z"
+    }
+  ],
+  "nextCursor": null
+}
+```
+
+### 6.1.3 Get Single Ticket
+**Method:** `GET`
+**Route:** `/tickets/{ticketId}`
+**Auth:** `Required`
+
+**Path Params:**
+'ticketId' **- ID of the ticket**
+
+**Response 200 OK:**
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "title": "VPN not connecting",
+  "description": "I cannot connect to the corporate VPN from home.",
+  "status": "OPEN",
+  "priority": "HIGH",
+  "isEmergency": "EMERGENCY",
+  "isEmergencyBool": true,
+  "createdByUserId": "customer_ashley",
+  "assignedTechId": "tech_mike",
+  "assignedGroupId": "group_level_1",
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T21:02:10Z"
+}
+```
+
+**Error Responses:**
+`404 NOT_FOUND` **- ticket does not exist or not visible to this user**
+`403 FORBIDDEN` **- user not allowed to view**
+
+### 6.1.4 Update Ticket (Status/Priority)
+**Method:** `PATCH`
+**Route:** `/tickets/{ticketId}`
+**Auth: Required**
+**Roles: TECH, ADMIN(CUSTOMER might be restricted from status/priority updates)**
+
+**Path Params:**
+`ticketId`
+
+**Request Body (partial update):**
+
+```json
+{
+  "status": "IN_PROGRESS",   // optional
+  "priority": "CRITICAL"     // optional
+}
+```
+
+**Response 200 OK:**
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "title": "VPN not connecting",
+  "description": "I cannot connect to the corporate VPN from home.",
+  "status": "IN_PROGRESS",
+  "priority": "CRITICAL",
+  "isEmergency": "EMERGENCY",
+  "isEmergencyBool": true,
+  "createdByUserId": "customer_ashley",
+  "assignedTechId": "tech_mike",
+  "assignedGroupId": "group_level_1",
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T21:30:00Z"
+}
+```
+**Error Responses:**
+`400 INVALID_REQUEST` **- invalid status/priority**
+`403 FORBIDDEN` **- user not allowed to modify**
+`404 NOT_FOUND` **- ticket not found**
+
+## 6.2 Ticket Messages
+
+### 6.2.1 List Ticket Messages
+**Method:** `GET`
+**Route:** `/tickets/{ticketId}/messages`
+**Auth: Required**
+**Roles: CUSTOMER(own)/ TECH?ADMIN(assigned / global)**
+
+**Response 200 OK:**
+```json
+{
+  "items": [
+    {
+      "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+      "messageTimestamp": "2026-01-05T20:20:01Z",
+      "senderUserId": "customer_ashley",
+      "senderRole": "CUSTOMER",
+      "content": "Here is a screenshot of the error.",
+      "isSystem": false
+    },
+    {
+      "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+      "messageTimestamp": "2026-01-05T20:25:10Z",
+      "senderUserId": "tech_mike",
+      "senderRole": "TECH",
+      "content": "We're looking into this now.",
+      "isSystem": false
+    }
+  ]
+}
+```
+### 6.2.2 Send Ticket Message
+**Method:** `POST`
+**Route:** `/tickets/{ticketId}/messages`
+**Auth: Required**
+**Roles: CUSTOMER(own), TECH/ADMIN(assigned / global)**
+
+**Request Body**
+```json
+{
+  "content": "Can you confirm your internet connection is working?"
+}
+```
+
+**Response 201 Created:**
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "messageTimestamp": "2026-01-05T20:25:10Z",
+  "senderUserId": "tech_mike",
+  "senderRole": "TECH",
+  "content": "Can you confirm your internet connection is working?",
+  "isSystem": false
+}
+```
+## 6.3 Admin Endpoints
+### 6.3.1 Create Group
+**Method:** `POST`
+**Route:** `/admin/groups`
+**Auth: Required**
+**Roles: ADMIN**
+
+**Request Body**
+```json
+{
+  "name": "Level 1 Support",
+  "description": "Front-line IT support team"
+}
+```
+**Response 201 Created**
+```json
+{
+  "groupId": "group_level_1",
+  "name": "Level 1 Support",
+  "description": "Front-line IT support team",
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T20:15:30Z"
+}
+```
+
+### 6.3.2 Create User
+**Method:** `POST`
+**Route:** `/admin/users`
+**Auth: Required**
+**Roles: ADMIN**
+
+**Request Body:**
+```json
+{
+  "userId": "tech_mike",
+  "email": "mike.tech@example.com",
+  "displayName": "Mike (Tech)",
+  "role": "TECH",
+  "groupIds": ["group_level_1"]
+}
+```
+
+**Response 201 Created:**
+```json
+{
+  "userId": "tech_mike",
+  "email": "mike.tech@example.com",
+  "displayName": "Mike (Tech)",
+  "role": "TECH",
+  "groupIds": ["group_level_1"],
+  "createdAt": "2026-01-05T20:15:30Z",
+  "updatedAt": "2026-01-05T20:15:30Z",
+  "isActive": true
+}
+```
+### 6.3.3 Assign Tickets
+**Method:** `POST`
+**Route:** `/admin/tickets/{ticketId}/assign`
+**Auth: Required**
+**Roles: ADMIN**
+
+**Request Body:**
+```json
+{
+  "assignedTechId": "tech_mike",
+  "assignedGroupId": "group_level_1"
+}
+```
+
+***Response 200 OK:*
+```json
+{
+  "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+  "assignedTechId": "tech_mike",
+  "assignedGroupId": "group_level_1",
+  "updatedAt": "2026-01-05T21:30:00Z"
+}
+```
+### 6.3.4 List Users
+**Method:** `GET`
+**Route:** `/admin/users`
+**Auth: Required**
+**Roles: ADMIN**
+
+**Response 200 OK:**
+```json
+{
+  "items": [
+    {
+      "userId": "customer_ashley",
+      "email": "ashley@example.com",
+      "displayName": "Ashley",
+      "role": "CUSTOMER",
+      "groupIds": [],
+      "isActive": true,
+      "createdAt": "2026-01-05T20:15:30Z",
+      "updatedAt": "2026-01-05T20:15:30Z"
+    }
+  ]
+}
+```
+
+### 6.3.5 List Groups
+**Method:** `GET`
+**Route:** `/admin/groups`
+**Auth: Required**
+**Roles: ADMIN**
+
+**Response 200 OK:**
+```json
+{
+  "items": [
+    {
+      "groupId": "group_level_1",
+      "name": "Level 1 Support",
+      "description": "Front-line IT support team",
+      "createdAt": "2026-01-05T20:15:30Z",
+      "updatedAt": "2026-01-05T20:15:30Z"
+    }
+  ]
+}
+```
+
+### 6.3.6 List All Tikcets (Admin View)
+**Method:** `GEt`
+**Route:** `/admin/tickets`
+**Auth: Required**
+**Roles: ADMIN**
+
+### Query Parameters (Optional):
+
+status
+
+priority
+
+isEmergency
+
+assignedGroupId
+
+assignedTechId
+
+limit
+
+cursor
+
+**Response 200 OK:**
+```json
+{
+  "items": [
+    {
+      "ticketId": "ticket_c8d8e023b41a49cba8e24320592c696c",
+      "title": "VPN not connecting",
+      "status": "IN_PROGRESS",
+      "priority": "CRITICAL",
+      "isEmergency": "EMERGENCY",
+      "isEmergencyBool": true,
+      "createdByUserId": "customer_ashley",
+      "assignedTechId": "tech_mike",
+      "assignedGroupId": "group_level_1",
+      "createdAt": "2026-01-05T20:15:30Z",
+      "updatedAt": "2026-01-05T21:30:00Z"
+    }
+  ],
+  "nextCursor": null
+}
+```
+
+## 7. Error Handling
+
+### 7.1 Error Response Shape 
+**All non-2xx responses should follow this structure**
+
+```json
+{
+  "errorCode": "INVALID_REQUEST",
+  "message": "Priority must be one of: LOW, NORMAL, HIGH, CRITICAL.",
+  "details": null,
+  "requestId": "abc123-xyz"
+}
+```
+### 7.2 Common Error Codes
+| HTTP | errorCode       | Description                                    |
+| ---- | --------------- | ---------------------------------------------- |
+| 400  | INVALID_REQUEST | Validation errors, malformed JSON, bad fields  |
+| 401  | UNAUTHENTICATED | Missing or invalid auth                        |
+| 403  | FORBIDDEN       | User is authenticated but not allowed          |
+| 404  | NOT_FOUND       | Resource not found / not visible               |
+| 409  | CONFLICT        | Conflicting update or invalid state transition |
+| 500  | INTERNAL_ERROR  | Unexpected server error                        |
+
+---
+
+## 8.Monitoring & Logging (API-Level)
+All requests should log:
+
+requestId
+
+path
+
+method
+
+userId (if known)
+
+statusCode
+
+Error logs should include:
+
+errorCode
+
+stack trace (server-side only)
+
+API Gateway and Lambda are wired to CloudWatch Logs and CloudWatch Metrics.
+
+Alerting examples (future):
+
+High rate of 5xx responses on any route
+
+Spikes in emergency ticket creation
+
+Abnormal drop in overall traffic
+
+## 9.Future Enhancements
+
+Full Cognito integration and JWT authorizer enforcement
+
+Pagination & filtering on all list endpoints
+
+File upload support on messages (screenshots, logs)
+
+Soft delete / archival policies for old tickets & messages
+
+Rate limiting & API keys for external integrations
