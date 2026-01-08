@@ -1,20 +1,30 @@
 // ==============================================
-// The Winning Team – Ticket Dashboard Frontend
+// The Winning Team – Ticket Detail Frontend
 // ==============================================
 
-// 1. Set your API base URL here.
+// Keep this in sync with tickets.js
 const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
+const MAX_MESSAGE_LENGTH = 1200;
 
-// 2. DOM elements
-const userSelect = document.getElementById("userSelect");
-const loadTicketsBtn = document.getElementById("loadTicketsBtn");
-const ticketsTableBody = document.querySelector("#ticketsTable tbody");
-const statusMessage = document.getElementById("statusMessage");
+// DOM elements
+const ticketMeta = document.getElementById("ticketMeta");
+const messagesList = document.getElementById("messagesList");
+const messageInput = document.getElementById("messageInput");
+const sendMessageBtn = document.getElementById("sendMessageBtn");
+const detailStatus = document.getElementById("detailStatus");
 
-// 3. Helpers
-function setStatus(message, type = "info") {
-  statusMessage.textContent = message || "";
-  statusMessage.className = "status-message " + type;
+// Parse query: ?ticketId=...&userId=...
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    ticketId: params.get("ticketId"),
+    userId: params.get("userId") || "customer_ashley"
+  };
+}
+
+function setDetailStatus(message, type = "info") {
+  detailStatus.textContent = message || "";
+  detailStatus.className = "status-message " + type;
 }
 
 function formatDate(isoString) {
@@ -27,131 +37,198 @@ function formatDate(isoString) {
   }
 }
 
-function clearTicketsTable() {
-  while (ticketsTableBody.firstChild) {
-    ticketsTableBody.removeChild(ticketsTableBody.firstChild);
-  }
-}
-
-function renderTickets(tickets) {
-  clearTicketsTable();
-
-  if (!tickets || tickets.length === 0) {
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
-    cell.colSpan = 7;
-    cell.textContent = "No tickets found for this user.";
-    row.appendChild(cell);
-    ticketsTableBody.appendChild(row);
+// Render ticket metadata
+function renderTicketMeta(ticket) {
+  if (!ticket) {
+    ticketMeta.innerHTML = "<p>Ticket not found.</p>";
     return;
   }
 
-  tickets.forEach((ticket) => {
-    const row = document.createElement("tr");
-    row.classList.add("clickable-row");
+  ticketMeta.innerHTML = `
+    <div class="ticket-meta-grid">
+      <div>
+        <h4>${ticket.title || "Untitled Ticket"}</h4>
+        <p><strong>ID:</strong> ${ticket.ticketId || ""}</p>
+        <p><strong>Description:</strong> ${ticket.description || ""}</p>
+      </div>
+      <div>
+        <p><strong>Status:</strong> ${ticket.status || ""}</p>
+        <p><strong>Priority:</strong> ${ticket.priority || ""}</p>
+        <p><strong>Emergency:</strong> ${
+          ticket.isEmergency || (ticket.isEmergencyBool ? "EMERGENCY" : "NORMAL")
+        }</p>
+      </div>
+      <div>
+        <p><strong>Created By:</strong> ${ticket.createdByUserId || ""}</p>
+        <p><strong>Assigned Tech:</strong> ${ticket.assignedTechId || "—"}</p>
+        <p><strong>Assigned Group:</strong> ${ticket.assignedGroupId || "—"}</p>
+      </div>
+      <div>
+        <p><strong>Created:</strong> ${formatDate(ticket.createdAt)}</p>
+        <p><strong>Updated:</strong> ${formatDate(ticket.updatedAt)}</p>
+      </div>
+    </div>
+  `;
+}
 
-    const idCell = document.createElement("td");
-    idCell.textContent = ticket.ticketId || "";
-    row.appendChild(idCell);
+// Render messages
+function renderMessages(messages) {
+  messagesList.innerHTML = "";
 
-    const titleCell = document.createElement("td");
-    titleCell.textContent = ticket.title || "";
-    row.appendChild(titleCell);
+  if (!messages || messages.length === 0) {
+    messagesList.innerHTML =
+      '<p class="small-note mini">No messages yet on this ticket.</p>';
+    return;
+  }
 
-    const statusCell = document.createElement("td");
-    statusCell.textContent = ticket.status || "";
-    row.appendChild(statusCell);
+  messages.forEach((m) => {
+    const div = document.createElement("div");
+    div.classList.add("message-item");
 
-    const priorityCell = document.createElement("td");
-    priorityCell.textContent = ticket.priority || "";
-    row.appendChild(priorityCell);
+    const roleLabel = m.senderRole || "USER";
+    const timeLabel = formatDate(m.timestamp);
 
-    const emergencyCell = document.createElement("td");
-    const isEmergencyFlag = ticket.isEmergency || "";
-    const isEmergencyBool = ticket.isEmergencyBool;
-    emergencyCell.textContent =
-      isEmergencyFlag || (isEmergencyBool ? "EMERGENCY" : "NORMAL");
-    row.appendChild(emergencyCell);
+    div.innerHTML = `
+      <div class="message-header">
+        <span class="message-role">${roleLabel}</span>
+        <span class="message-sender">${m.senderId || ""}</span>
+        <span class="message-time">${timeLabel}</span>
+      </div>
+      <div class="message-body">
+        ${m.messageText || ""}
+      </div>
+      ${m.isSystem ? '<div class="message-system-tag">System</div>' : ""}
+    `;
 
-    const createdCell = document.createElement("td");
-    createdCell.textContent = formatDate(ticket.createdAt);
-    row.appendChild(createdCell);
-
-    const updatedCell = document.createElement("td");
-    updatedCell.textContent = formatDate(ticket.updatedAt);
-    row.appendChild(updatedCell);
-
-    // Click row -> ticket detail
-    row.addEventListener("click", () => {
-      const userId = userSelect.value || "customer_ashley";
-      const ticketId = ticket.ticketId;
-      if (!ticketId) return;
-
-      const url = `ticket-detail.html?ticketId=${encodeURIComponent(
-        ticketId
-      )}&userId=${encodeURIComponent(userId)}`;
-
-      window.location.href = url;
-    });
-
-    ticketsTableBody.appendChild(row);
+    messagesList.appendChild(div);
   });
 }
 
-// 4. API call
-async function fetchTicketsForUser(userId) {
-  if (!API_BASE_URL || API_BASE_URL.includes("<your-api-id>")) {
-    setStatus(
-      "Please update API_BASE_URL in tickets.js with your real API Gateway URL.",
-      "error"
-    );
+// Load ticket + messages
+async function loadTicketAndMessages() {
+  const { ticketId, userId } = getQueryParams();
+
+  if (!ticketId) {
+    ticketMeta.innerHTML = "<p>No ticketId provided in URL.</p>";
     return;
   }
 
-  setStatus(`Loading tickets for ${userId}...`, "info");
-  clearTicketsTable();
+  setDetailStatus("Loading ticket...", "info");
 
   try {
-    const response = await fetch(`${API_BASE_URL}/tickets`, {
+    // Ticket
+    const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       method: "GET",
       headers: {
         "x-user-id": userId
       }
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Error response:", text);
-      setStatus(
-        `Error loading tickets (${response.status}). Check console for details.`,
+    if (!ticketResp.ok) {
+      const text = await ticketResp.text();
+      console.error("Ticket error:", text);
+      setDetailStatus(`Error loading ticket (${ticketResp.status}).`, "error");
+      ticketMeta.innerHTML = "<p>Could not load ticket details.</p>";
+      return;
+    }
+
+    const ticket = await ticketResp.json();
+    renderTicketMeta(ticket);
+
+    // Messages
+    const msgResp = await fetch(
+      `${API_BASE_URL}/tickets/${ticketId}/messages`,
+      {
+        method: "GET",
+        headers: {
+          "x-user-id": userId
+        }
+      }
+    );
+
+    if (!msgResp.ok) {
+      const text = await msgResp.text();
+      console.error("Messages error:", text);
+      setDetailStatus(
+        `Loaded ticket, but error loading messages (${msgResp.status}).`,
         "error"
       );
       return;
     }
 
-    const data = await response.json();
-    const items = Array.isArray(data.items) ? data.items : [];
+    const msgData = await msgResp.json();
+    const items = Array.isArray(msgData.messages) ? msgData.messages : [];
 
-    renderTickets(items);
-    setStatus(`Loaded ${items.length} ticket(s) for ${userId}.`, "success");
+    renderMessages(items);
+    setDetailStatus("Ticket and messages loaded.", "success");
   } catch (err) {
-    console.error("Fetch error:", err);
-    setStatus(
-      "Network or CORS error while loading tickets. See console for details.",
+    console.error("Detail fetch error:", err);
+    setDetailStatus(
+      "Network or CORS error while loading ticket detail.",
       "error"
     );
   }
 }
 
-// 5. Event wiring
-if (loadTicketsBtn && userSelect) {
-  loadTicketsBtn.addEventListener("click", () => {
-    const userId = userSelect.value;
-    fetchTicketsForUser(userId);
-  });
+// Send message
+async function sendMessage() {
+  const { ticketId, userId } = getQueryParams();
+  const content = messageInput.value.trim();
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const defaultUser = userSelect.value || "customer_ashley";
-    fetchTicketsForUser(defaultUser);
-  });
+  if (!content) {
+    setDetailStatus("Please type a message before sending.", "error");
+    return;
+  }
+
+  if (content.length > MAX_MESSAGE_LENGTH) {
+    setDetailStatus(
+      `Message too long (max ${MAX_MESSAGE_LENGTH} characters).`,
+      "error"
+    );
+    return;
+  }
+
+  setDetailStatus("Sending message...", "info");
+
+  try {
+    const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId
+      },
+      body: JSON.stringify({
+        messageText: content
+      })
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error("Send message error:", text);
+      setDetailStatus(`Error sending message (${resp.status}).`, "error");
+      return;
+    }
+
+    messageInput.value = "";
+    setDetailStatus("Message sent.", "success");
+    await loadTicketAndMessages();
+  } catch (err) {
+    console.error("Send message network error:", err);
+    setDetailStatus(
+      "Network or CORS error while sending message.",
+      "error"
+    );
+  }
+}
+
+// Wiring
+document.addEventListener("DOMContentLoaded", () => {
+  if (messageInput) {
+    messageInput.maxLength = MAX_MESSAGE_LENGTH;
+  }
+  loadTicketAndMessages();
+});
+
+if (sendMessageBtn) {
+  sendMessageBtn.addEventListener("click", sendMessage);
 }
