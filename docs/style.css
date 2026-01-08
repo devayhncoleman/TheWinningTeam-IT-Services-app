@@ -1,3 +1,8 @@
+/* =========================================================
+   The Winning Team — Executive Royal Theme (Square / Clean)
+   Single theme system: body.theme-day / body.theme-night
+   ========================================================= */
+
 /* =========================
    Global Theme Tokens
    ========================= */
@@ -14,23 +19,29 @@
 
   /* Accents */
   --accent-purple: #8b5cf6;
-  --accent-purple-soft: rgba(139, 92, 246, 0.35);
+  --accent-purple-soft: rgba(139, 92, 246, 0.28);
+
   --accent-blue: #1d4ed8;
-  --accent-blue-soft: rgba(37, 99, 235, 0.25);
+  --accent-blue-soft: rgba(37, 99, 235, 0.22);
+
   --accent-gold: #fbbf24;
-  --accent-gold-soft: rgba(251, 191, 36, 0.24);
+  --accent-gold-soft: rgba(251, 191, 36, 0.18);
 
   /* Text & border */
   --text-main: #f9fafb;
   --text-muted: #9ca3af;
   --text-soft: rgba(156, 163, 175, 0.95);
 
-  --border-subtle: rgba(148, 163, 184, 0.16);
+  --border-subtle: rgba(148, 163, 184, 0.18);
+  --border-strong: rgba(148, 163, 184, 0.32);
 
   --shadow-soft: 0 22px 40px rgba(0, 0, 0, 0.65);
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+
+  /* EXEC: square-ish */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text",
     "Segoe UI", sans-serif;
@@ -38,9 +49,8 @@
 }
 
 /* =========================
-   Page Shell – “Royal Hall”
+   Base
    ========================= */
-
 html,
 body {
   margin: 0;
@@ -51,77 +61,64 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Day = purple hall */
 body {
-  display: flex;
-  justify-content: center;
+  /* default (day) */
   background:
-    radial-gradient(circle at top, #35105f 0%, var(--bg-main-day) 55%, #000 100%);
+    radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.22), transparent 55%),
+    radial-gradient(circle at 90% 0%, rgba(251, 191, 36, 0.14), transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.10), transparent 55%),
+    linear-gradient(180deg, #080015 0%, #030009 60%, #000 100%);
 }
 
-body.night-mode {
-  /* Night = royal blue hall */
+body.theme-night {
   background:
-    radial-gradient(circle at top, #1e3a8a 0%, var(--bg-main-night) 55%, #020617 100%);
+    radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.25), transparent 55%),
+    radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.16), transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(37, 99, 235, 0.10), transparent 55%),
+    linear-gradient(180deg, #020617 0%, #000611 60%, #000 100%);
 }
 
+/* =========================
+   Universal shell sizing (reduce empty space)
+   ========================= */
 .page-shell {
+  width: min(1400px, calc(100% - 3rem));
+  margin: 1.75rem auto 2.5rem;
   position: relative;
-  width: 100%;
-  max-width: 1400px;
-  padding: 2.5rem 1.5rem 2rem;
 }
 
-/* “Museum wall” background */
-.page-accent {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 15% 15%, rgba(251, 191, 36, 0.08), transparent 55%),
-    radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.12), transparent 55%),
-    radial-gradient(circle at 10% 85%, rgba(139, 92, 246, 0.08), transparent 55%);
-  opacity: 0.9;
+.ticket-shell,
+.ticket-detail-shell {
+  width: min(1400px, calc(100% - 3rem));
+  margin: 1.75rem auto 2.5rem;
 }
 
-/* Main card = “exhibit room” */
-.page-main {
-  position: relative;
-  max-width: 1160px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, var(--bg-elevated-day), #050013);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(148, 163, 184, 0.32);
+/* =========================
+   Main “room”
+   ========================= */
+.page-main,
+.ticket-shell,
+.ticket-detail-shell {
+  background: linear-gradient(
+    135deg,
+    rgba(8, 0, 24, 0.92),
+    rgba(6, 10, 30, 0.96)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: var(--shadow-soft);
-  padding: 2.25rem 2.6rem 1.8rem;
-  backdrop-filter: blur(26px);
+  border-radius: var(--radius-xl);
+  padding: 2rem 2.25rem;
+  backdrop-filter: blur(18px);
 }
 
-body.night-mode .page-main {
-  background: linear-gradient(135deg, var(--bg-elevated-night), #020617);
-  border-color: rgba(37, 99, 235, 0.5);
-}
-
-/* Light vertical “pillars” like a gallery */
-.page-main::before,
-.page-main::after {
-  content: "";
-  position: absolute;
-  top: 1.6rem;
-  bottom: 1.6rem;
-  width: 2px;
-  border-radius: 999px;
-  opacity: 0.35;
-}
-
-.page-main::before {
-  left: 1.4rem;
-  background: linear-gradient(to bottom, rgba(251, 191, 36, 0.45), transparent);
-}
-
-.page-main::after {
-  right: 1.4rem;
-  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), transparent);
+body.theme-night .page-main,
+body.theme-night .ticket-shell,
+body.theme-night .ticket-detail-shell {
+  background: linear-gradient(
+    135deg,
+    rgba(5, 10, 28, 0.92),
+    rgba(2, 6, 17, 0.96)
+  );
 }
 
 /* =========================
@@ -133,77 +130,66 @@ h3,
 h4 {
   margin: 0 0 0.4rem;
   font-weight: 500;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
 h1 {
   font-family: var(--font-display);
-  font-size: 1.75rem;
+  font-size: 1.7rem;
 }
 
-h2 {
-  font-size: 1.35rem;
-}
-
-h3 {
-  font-size: 1.1rem;
-}
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
 
 p {
   margin: 0.2rem 0;
   line-height: 1.6;
 }
 
+.small-note,
 .mini {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-soft);
 }
 
 /* =========================
-   Shared layout blocks
+   Sections
    ========================= */
-
-.page-content {
-  margin-top: 1.6rem;
-}
+.page-content { margin-top: 1.25rem; }
 
 .section {
-  margin-bottom: 1.9rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--border-subtle);
 }
-
-.section:last-of-type {
-  border-bottom: none;
-}
+.section:last-of-type { border-bottom: none; }
 
 /* =========================
-   Top “nameplate” header
+   Header blocks (NO PILL)
    ========================= */
-
+.site-header,
 .gallery-header,
-.site-header {
+.ticket-header {
   display: flex;
   justify-content: space-between;
-  gap: 2rem;
-  padding: 1.2rem 1.6rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.09), transparent 55%),
-    linear-gradient(120deg, rgba(12, 10, 43, 0.96), rgba(24, 0, 60, 0.98));
-  margin-bottom: 1.4rem;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(251, 191, 36, 0.10), transparent 55%),
+    linear-gradient(120deg, rgba(12, 10, 43, 0.92), rgba(24, 0, 60, 0.94));
 }
 
-body.night-mode .gallery-header,
-body.night-mode .site-header {
-  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 55%),
-    linear-gradient(120deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+body.theme-night .site-header,
+body.theme-night .gallery-header,
+body.theme-night .ticket-header {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
+    linear-gradient(120deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 17, 0.96));
 }
 
-.header-left {
-  flex: 1.4;
-}
-
+.header-left { flex: 1.4; }
 .header-right {
   flex: 1;
   display: flex;
@@ -211,57 +197,15 @@ body.night-mode .site-header {
   justify-content: flex-end;
 }
 
-.tagline {
-  margin-top: 0.2rem;
-  font-size: 0.9rem;
-  color: var(--text-soft);
-}
-
-.availability-pill {
-  display: inline-block;
-  margin-top: 0.55rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.7);
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.05));
-  font-size: 0.8rem;
-}
-
-.header-meta {
-  margin-top: 0.6rem;
-  font-size: 0.85rem;
-  color: var(--text-soft);
-}
-
-.metrics-bar {
-  display: flex;
-  gap: 1.1rem;
-  margin-top: 0.9rem;
-}
-
-.metric {
-  padding: 0.5rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.38);
-  background: radial-gradient(circle at top, rgba(148, 163, 184, 0.22), transparent 65%);
-}
-
-.metric-value {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
 /* =========================
-   Header actions bar
+   Header actions row
    ========================= */
-
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1.1rem 0 1.4rem;
-  gap: 1.5rem;
+  margin: 1rem 0 1.25rem;
+  gap: 1rem;
 }
 
 .header-actions-left,
@@ -269,31 +213,26 @@ body.night-mode .site-header {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.7rem;
+  gap: 0.6rem;
 }
 
 /* =========================
-   Buttons & chips
+   Buttons (EXEC — less bubbly)
    ========================= */
-
 button {
-  border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.65);
   background: linear-gradient(90deg, #f59e0b, #fbbf24);
   color: #111827;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  transition:
-    transform 0.12s ease-out,
-    box-shadow 0.12s ease-out,
-    background 0.12s ease-out,
-    border-color 0.12s ease-out;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  gap: 0.35rem;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55);
 }
 
 button.primary-cta {
@@ -301,42 +240,28 @@ button.primary-cta {
   background: linear-gradient(120deg, #fbbf24, #f97316);
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.7);
-  border-color: #facc15;
-}
+button:hover { transform: translateY(-1px); filter: brightness(1.02); }
+button:active { transform: translateY(0); }
 
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65);
-}
-
-/* Smaller “chip” buttons */
+/* Chips */
 .chip-row {
-  margin-top: 1rem;
+  margin-top: 0.9rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .chip {
-  background: rgba(15, 23, 42, 0.9);
-  border-color: rgba(148, 163, 184, 0.6);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.35);
   color: var(--text-soft);
-  padding: 0.3rem 0.8rem;
+  padding: 0.32rem 0.75rem;
   box-shadow: none;
 }
+.chip:hover { background: rgba(251, 191, 36, 0.08); color: #fefce8; }
 
-.chip:hover {
-  background: rgba(251, 191, 36, 0.1);
-  color: #fefce8;
-}
-
-/* =========================
-   Volume control
-   ========================= */
-
+/* Volume control */
 .vol {
   display: inline-flex;
   align-items: center;
@@ -344,67 +269,68 @@ button:active {
   font-size: 0.78rem;
   color: var(--text-soft);
 }
-
-.vol input[type="range"] {
-  accent-color: #facc15;
-}
+.vol input[type="range"] { accent-color: #facc15; }
 
 /* =========================
-   Nav
+   Nav (EXEC, small gold buttons)
    ========================= */
-
-.nav-inner {
-  margin-bottom: 1.4rem;
-}
-
-.nav-inner ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.top-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
 }
 
-.nav-inner a {
-  font-size: 0.8rem;
-  color: var(--text-soft);
+/* replaces “Craigslist links” */
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   text-decoration: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background: rgba(15, 23, 42, 0.55);
+  color: rgba(255, 246, 231, 0.9);
+  background: rgba(15, 23, 42, 0.35);
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
 
-.nav-inner a:hover {
-  border-color: rgba(251, 191, 36, 0.75);
+.nav-pill:hover {
+  transform: translateY(-1px);
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.7);
+}
+
+.nav-pill--active {
+  background: linear-gradient(135deg, #f9a826, #ffd56a);
+  color: #2b1200;
+  border-color: rgba(255, 213, 106, 0.9);
 }
 
 /* =========================
    Lists & bullets
    ========================= */
-
 .bullets {
   margin: 0.4rem 0 0;
   padding-left: 1.2rem;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
-
-.bullets li {
-  margin-bottom: 0.35rem;
-}
+.bullets li { margin-bottom: 0.35rem; }
 
 /* =========================
    Fun panel & mini game
    ========================= */
-
 .fun-panel {
   margin-top: 0.7rem;
   padding: 0.9rem 1rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 70%),
-    rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 70%),
+    rgba(15, 23, 42, 0.86);
 }
 
 .cta-row {
@@ -418,47 +344,39 @@ button:active {
   margin-top: 0.9rem;
   padding: 0.9rem 1rem;
   border-radius: var(--radius-lg);
-  border: 1px dashed rgba(148, 163, 184, 0.5);
-  background: rgba(15, 23, 42, 0.85);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.82);
 }
 
 /* =========================
-   Gallery cards (Showcase)
+   Showcase cards
    ========================= */
-
-.gallery-intro {
-  margin-bottom: 0.8rem;
-}
-
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
 .gallery-card {
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: radial-gradient(circle at top, rgba(139, 92, 246, 0.16), transparent 60%),
-    rgba(15, 23, 42, 0.96);
-  padding: 0.9rem 1.05rem 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  background:
+    radial-gradient(circle at top, rgba(139, 92, 246, 0.14), transparent 62%),
+    rgba(15, 23, 42, 0.92);
+  padding: 0.95rem 1.05rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 190px;
-}
-
-.gallery-frame {
-  margin-bottom: 0.6rem;
+  min-height: 185px;
 }
 
 .gallery-tag {
   display: inline-block;
   font-size: 0.7rem;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.7);
-  background: rgba(251, 191, 36, 0.12);
+  padding: 0.16rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  background: rgba(251, 191, 36, 0.10);
   margin-bottom: 0.45rem;
 }
 
@@ -471,86 +389,70 @@ button:active {
 }
 
 /* =========================
-   Ticket Dashboard Table
+   Tickets table
    ========================= */
-
 .table-wrapper {
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.90);
   overflow: hidden;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 thead {
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.28), rgba(15, 23, 42, 0.98));
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.22), rgba(15, 23, 42, 0.98));
 }
 
-th,
-td {
-  padding: 0.5rem 0.7rem;
+th, td {
+  padding: 0.55rem 0.7rem;
   text-align: left;
 }
 
-tbody tr:nth-child(even) {
-  background: rgba(15, 23, 42, 0.95);
-}
+tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.92); }
+tbody tr:nth-child(odd)  { background: rgba(9, 9, 24, 0.92); }
 
-tbody tr:nth-child(odd) {
-  background: rgba(9, 9, 24, 0.95);
-}
-
-tbody tr:hover {
-  background: rgba(251, 191, 36, 0.08);
-}
-
-.clickable-row {
-  cursor: pointer;
-}
+tbody tr:hover { background: rgba(251, 191, 36, 0.08); }
+.clickable-row { cursor: pointer; }
 
 /* =========================
-   Ticket Detail View
+   Ticket detail
    ========================= */
-
-.ticket-meta {
-  margin-top: 0.7rem;
-  padding: 1rem 1.1rem;
+.ticket-meta-card {
+  margin-top: 0.9rem;
+  padding: 1.1rem 1.25rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.15), transparent 60%),
-    rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.12), transparent 60%),
+    rgba(15, 23, 42, 0.94);
 }
 
 .ticket-meta-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 0.8rem 1.2rem;
-  font-size: 0.83rem;
-}
-
-.ticket-meta-grid h4 {
-  margin-bottom: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem 1rem;
+  font-size: 0.85rem;
 }
 
 .messages-list {
-  margin-top: 0.7rem;
-  padding: 0.7rem 0;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .message-item {
-  padding: 0.55rem 0.7rem;
+  padding: 0.6rem 0.8rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: rgba(15, 23, 42, 0.95);
-  font-size: 0.8rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(7, 19, 52, 0.92);
+  font-size: 0.85rem;
 }
 
 .message-header {
@@ -564,733 +466,120 @@ tbody tr:hover {
 
 .message-role {
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-weight: 600;
-}
-
-.message-body {
-  color: var(--text-main);
+  letter-spacing: 0.08em;
+  font-weight: 700;
 }
 
 .message-system-tag {
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(251, 191, 36, 0.85);
+  color: rgba(251, 191, 36, 0.9);
 }
 
 .message-composer {
   margin-top: 0.9rem;
-  padding: 0.8rem 0.9rem 0.9rem;
+  padding: 0.85rem 0.95rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.94);
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
 
 .message-composer textarea {
   width: 100%;
-  min-height: 80px;
+  min-height: 90px;
   resize: vertical;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  padding: 0.5rem 0.6rem;
-  background: rgba(9, 9, 24, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 0.6rem 0.7rem;
+  background: rgba(2, 8, 30, 0.96);
   color: var(--text-main);
   font-family: var(--font-sans);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .message-composer textarea::placeholder {
   color: rgba(148, 163, 184, 0.7);
 }
 
+.primary-cta--wide { width: 100%; }
+
 /* =========================
    Status messages
    ========================= */
-
 .status-message {
-  margin-top: 0.25rem;
-  font-size: 0.78rem;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
   color: var(--text-soft);
 }
-
-.status-message.success {
-  color: #22c55e;
-}
-
-.status-message.error {
-  color: #f97373;
-}
+.status-message.success { color: #22c55e; }
+.status-message.error   { color: #f97373; }
 
 /* =========================
    Footer
    ========================= */
-
 .site-footer {
-  margin-top: 1.4rem;
-  padding-top: 0.7rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  margin-top: 1.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
   font-size: 0.78rem;
   color: var(--text-soft);
+}
+
+.site-footer--compact {
+  margin-top: 2rem;
+  font-size: 0.76rem;
+  text-align: right;
+  opacity: 0.82;
+}
+
+/* =========================
+   Accessibility helper
+   ========================= */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* =========================
    Responsive tweaks
    ========================= */
-
-@media (max-width: 768px) {
-  .page-main {
-    padding: 1.6rem 1.3rem 1.4rem;
+@media (max-width: 900px) {
+  .page-shell,
+  .ticket-shell,
+  .ticket-detail-shell {
+    width: calc(100% - 1.5rem);
+    margin: 1.25rem auto 2rem;
   }
 
+  .page-main,
+  .ticket-shell,
+  .ticket-detail-shell {
+    padding: 1.35rem 1.2rem;
+    border-radius: 18px;
+  }
+
+  .site-header,
   .gallery-header,
-  .site-header {
+  .ticket-header {
     flex-direction: column;
     align-items: flex-start;
-    border-radius: 1.1rem;
+    border-radius: 16px;
   }
 
   .header-actions {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .metrics-bar {
-    flex-wrap: wrap;
-  }
-}
-/* ================= TICKET PAGES LAYOUT ================= */
-
-.ticket-shell,
-.ticket-detail-shell {
-  max-width: 1160px;
-  margin: 3rem auto 4rem;
-  padding: 2.5rem 3rem 3rem;
-  border-radius: 32px;
-  background: rgba(3, 0, 20, 0.9);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.ticket-main {
-  margin-top: 1.75rem;
-}
-
-/* Shared header for ticket pages */
-.ticket-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.ticket-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.ticket-title {
-  font-family: "Playfair Display", system-ui, serif;
-  font-size: 1.4rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ticket-header-actions button#toggleNightShift {
-  font-size: 0.8rem;
-  padding: 0.4rem 1.1rem;
-}
-
-/* Compact footer for ticket pages */
-.site-footer--compact {
-  margin-top: 2.25rem;
-  font-size: 0.75rem;
-  text-align: right;
-  opacity: 0.75;
-}
-
-/* Top nav pills inside ticket header */
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-}
-
-.nav-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 184, 77, 0.35);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: #fcefd4;
-  background: radial-gradient(circle at 0 0, #5c2a8a, #2c0d3a);
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.nav-pill:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.nav-pill--active {
-  background: linear-gradient(135deg, #f9a826, #ffd56a);
-  color: #2b1200;
-  border-color: rgba(255, 213, 106, 0.9);
-}
-
-/* Detail view tweaks */
-.ticket-main--detail .section--messages {
-  margin-top: 1.5rem;
-}
-
-.ticket-meta-card {
-  margin-top: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-radius: 18px;
-  background: linear-gradient(
-    135deg,
-    rgba(28, 14, 56, 0.95),
-    rgba(12, 21, 60, 0.98)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* Messages list */
-.messages-list {
-  margin-top: 0.75rem;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-item {
-  padding: 0.55rem 0.75rem;
-  border-radius: 12px;
-  background: rgba(7, 19, 52, 0.9);
-  font-size: 0.85rem;
-}
-
-.message-item--system {
-  font-style: italic;
-  opacity: 0.8;
-}
-
-.message-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.7;
-  margin-bottom: 0.15rem;
-}
-
-/* Composer */
-.message-composer {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-composer textarea {
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(2, 8, 30, 0.95);
-  padding: 0.7rem 0.8rem;
-  color: #f5f3ff;
-  resize: vertical;
-}
-
-.primary-cta--wide {
-  width: 100%;
-}
-
-/* Status message inline on detail page */
-.status-message--inline {
-  margin-top: 0.5rem;
-  font-size: 0.78rem;
-}
-
-/* Simple accessibility helper */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Responsive tweak */
-@media (max-width: 900px) {
-  .ticket-shell,
-  .ticket-detail-shell {
-    padding: 1.5rem 1.25rem 2rem;
-    margin: 1.5rem 0 2rem;
-    border-radius: 18px;
-  }
-
-  .ticket-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .ticket-header-actions {
-    align-self: stretch;
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-
-/* ================= TICKET PAGES LAYOUT ================= */
-
-.ticket-shell,
-.ticket-detail-shell {
-  max-width: 1160px;
-  margin: 3rem auto 4rem;
-  padding: 2.5rem 3rem 3rem;
-  border-radius: 32px;
-  background: rgba(3, 0, 20, 0.9);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.ticket-main {
-  margin-top: 1.75rem;
-}
-
-/* Shared header for ticket pages */
-.ticket-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.ticket-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.ticket-title {
-  font-family: "Playfair Display", system-ui, serif;
-  font-size: 1.4rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ticket-header-actions button#toggleNightShift {
-  font-size: 0.8rem;
-  padding: 0.4rem 1.1rem;
-}
-
-/* Compact footer for ticket pages */
-.site-footer--compact {
-  margin-top: 2.25rem;
-  font-size: 0.75rem;
-  text-align: right;
-  opacity: 0.75;
-}
-
-/* Top nav pills inside ticket header */
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-}
-
-.nav-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 184, 77, 0.35);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: #fcefd4;
-  background: radial-gradient(circle at 0 0, #5c2a8a, #2c0d3a);
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.nav-pill:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.nav-pill--active {
-  background: linear-gradient(135deg, #f9a826, #ffd56a);
-  color: #2b1200;
-  border-color: rgba(255, 213, 106, 0.9);
-}
-
-/* Detail view tweaks */
-.ticket-main--detail .section--messages {
-  margin-top: 1.5rem;
-}
-
-.ticket-meta-card {
-  margin-top: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-radius: 18px;
-  background: linear-gradient(
-    135deg,
-    rgba(28, 14, 56, 0.95),
-    rgba(12, 21, 60, 0.98)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* Messages list */
-.messages-list {
-  margin-top: 0.75rem;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-item {
-  padding: 0.55rem 0.75rem;
-  border-radius: 12px;
-  background: rgba(7, 19, 52, 0.9);
-  font-size: 0.85rem;
-}
-
-.message-item--system {
-  font-style: italic;
-  opacity: 0.8;
-}
-
-.message-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.7;
-  margin-bottom: 0.15rem;
-}
-
-/* Composer */
-.message-composer {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-composer textarea {
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(2, 8, 30, 0.95);
-  padding: 0.7rem 0.8rem;
-  color: #f5f3ff;
-  resize: vertical;
-}
-
-.primary-cta--wide {
-  width: 100%;
-}
-
-/* Status message inline on detail page */
-.status-message--inline {
-  margin-top: 0.5rem;
-  font-size: 0.78rem;
-}
-
-/* Simple accessibility helper */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Responsive tweak */
-@media (max-width: 900px) {
-  .ticket-shell,
-  .ticket-detail-shell {
-    padding: 1.5rem 1.25rem 2rem;
-    margin: 1.5rem 0 2rem;
-    border-radius: 18px;
-  }
-
-  .ticket-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .ticket-header-actions {
-    align-self: stretch;
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-
-/* =========================================================
-   GLOBAL THEME + EXECUTIVE SQUARE OVERRIDES
-   (paste at the very bottom of style.css)
-   ========================================================= */
-
-:root {
-  /* existing colors still work; these just centralize them */
-  --gold-1: #f9a826;
-  --gold-2: #ffd56a;
-  --gold-text-dark: #2b1200;
-
-  --purple-inner: #16001e;
-  --purple-outer: #35004e;
-
-  --blue-inner: #02081e;
-  --blue-outer: #052b66;
-}
-
-/* ---------- BODY THEMES (APPLY EVERYWHERE) ---------- */
-
-body.theme-day {
-  background:
-    radial-gradient(circle at 0 0, #4a004f, #120016 55%),
-    radial-gradient(circle at 100% 100%, #5e1b7f, #05000d 65%);
-  color: #fef7ea;
-}
-
-body.theme-night {
-  background:
-    radial-gradient(circle at 0 0, #00163b, #000511 55%),
-    radial-gradient(circle at 100% 100%, #052b66, #000511 70%);
-  color: #fef7ea;
-}
-
-/* make sure the “cards” read against both themes */
-.page-shell,
-.ticket-shell,
-.ticket-detail-shell {
-  background: rgba(3, 0, 20, 0.92);
-  border-radius: 20px;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* the main interior card on landing / showcase */
-.page-main {
-  border-radius: 18px;            /* less pill, more executive */
-  background: linear-gradient(
-    135deg,
-    rgba(10, 4, 32, 0.96),
-    rgba(6, 8, 28, 0.98)
-  );
-}
-
-/* header frames: keep them soft, not super-pill */
-header,
-.gallery-header,
-.ticket-header {
-  border-radius: 14px;
-}
-
-/* remove any “giant bubble” feel from fancy header shapes */
-.header-left,
-.header-right {
-  border-radius: 14px;
-}
-
-/* ---------- TICKET SHELL LAYOUT (less empty space) ---------- */
-
-.ticket-shell,
-.ticket-detail-shell {
-  max-width: 1160px;
-  margin: 2.5rem auto 3rem;
-  padding: 2.25rem 2.5rem 2.5rem;
-}
-
-/* ticket header with nav pills (no Craigslist links) */
-.ticket-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.ticket-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.ticket-title {
-  font-family: "Playfair Display", system-ui, serif;
-  font-size: 1.4rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* the toggle lives here; keep it neat */
-.ticket-header-actions #toggleNightShift {
-  font-size: 0.78rem;
-  padding: 0.4rem 1.1rem;
-}
-
-/* nav pills inside ticket header */
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-}
-
-.nav-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 184, 77, 0.45);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: #fcefd4;
-  background: radial-gradient(circle at 0 0, #5c2a8a, #2c0d3a);
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.nav-pill:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-}
-
-.nav-pill--active {
-  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
-  color: var(--gold-text-dark);
-  border-color: rgba(255, 213, 106, 0.9);
-}
-
-/* tighter footer on ticket pages */
-.site-footer--compact {
-  margin-top: 2rem;
-  font-size: 0.75rem;
-  text-align: right;
-  opacity: 0.8;
-}
-
-/* messages panel in detail: use more width so it fills the space */
-.ticket-main--detail .section--messages {
-  margin-top: 1.25rem;
-}
-
-.ticket-meta-card {
-  margin-top: 1rem;
-  padding: 1.2rem 1.5rem;
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(28, 14, 56, 0.96),
-    rgba(12, 21, 60, 0.98)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-/* composer + messages */
-.messages-list {
-  margin-top: 0.75rem;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-item {
-  padding: 0.55rem 0.8rem;
-  border-radius: 12px;
-  background: rgba(7, 19, 52, 0.95);
-  font-size: 0.85rem;
-}
-
-.message-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.7;
-  margin-bottom: 0.15rem;
-}
-
-.message-composer {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.message-composer textarea {
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(2, 8, 30, 0.96);
-  padding: 0.7rem 0.85rem;
-  color: #f5f3ff;
-  resize: vertical;
-}
-
-.primary-cta--wide {
-  width: 100%;
-}
-
-/* inline status in detail view */
-.status-message--inline {
-  margin-top: 0.45rem;
-  font-size: 0.78rem;
-}
-
-/* responsive */
-@media (max-width: 900px) {
-  .ticket-shell,
-  .ticket-detail-shell {
-    margin: 1.5rem 0 2rem;
-    padding: 1.5rem 1.25rem 2rem;
-    border-radius: 18px;
-  }
-
-  .ticket-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .ticket-header-actions {
-    align-self: stretch;
-    display: flex;
-    justify-content: flex-end;
   }
 }
