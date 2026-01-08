@@ -83,4 +83,150 @@ function renderTicketMeta(ticket) {
       </div>
       <div>
         <p><strong>Created:</strong> ${escapeHtml(formatDate(ticket.createdAt))}</p>
-        <p><strong>Updated:</strong> ${escapeHtml(formatDate(tick
+        <p><strong>Updated:</strong> ${escapeHtml(formatDate(ticket.updatedAt))}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderMessages(messages) {
+  if (!messagesList) return;
+
+  messagesList.innerHTML = "";
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    messagesList.innerHTML = `<p class="muted">No messages yet on this ticket.</p>`;
+    return;
+  }
+
+  messages.forEach((m) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "message-item";
+
+    const roleLabel = m.senderRole || "USER";
+    const timeLabel = formatDate(m.timestamp);
+
+    wrapper.innerHTML = `
+      <div class="message-header">
+        <span class="message-role">${escapeHtml(roleLabel)}</span>
+        <span class="message-sender">${escapeHtml(m.senderId || "")}</span>
+        <span class="message-time">${escapeHtml(timeLabel)}</span>
+      </div>
+      <div class="message-body">${escapeHtml(m.messageText || "")}</div>
+      ${m.isSystem ? `<div class="message-system-tag">System</div>` : ""}
+    `;
+
+    messagesList.appendChild(wrapper);
+  });
+}
+
+// ---------- Loaders ----------
+async function loadTicketAndMessages() {
+  const { ticketId, userId } = getQueryParams();
+
+  if (!ticketId) {
+    if (ticketMeta) ticketMeta.innerHTML = `<p class="muted">No ticketId provided in URL.</p>`;
+    return;
+  }
+
+  setDetailStatus("Loading ticket…", "info");
+
+  try {
+    // Ticket
+    const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
+      method: "GET",
+      headers: { "x-user-id": userId }
+    });
+
+    if (!ticketResp.ok) {
+      const text = await ticketResp.text();
+      console.error("Ticket error:", text);
+      setDetailStatus(`Error loading ticket (${ticketResp.status}).`, "error");
+      if (ticketMeta) ticketMeta.innerHTML = `<p class="muted">Could not load ticket details.</p>`;
+      return;
+    }
+
+    const ticket = await ticketResp.json();
+    renderTicketMeta(ticket);
+
+    // Messages
+    const msgResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
+      method: "GET",
+      headers: { "x-user-id": userId }
+    });
+
+    if (!msgResp.ok) {
+      const text = await msgResp.text();
+      console.error("Messages error:", text);
+      setDetailStatus(`Loaded ticket, but error loading messages (${msgResp.status}).`, "error");
+      return;
+    }
+
+    const msgData = await msgResp.json();
+    const items = Array.isArray(msgData.messages) ? msgData.messages : [];
+    renderMessages(items);
+
+    setDetailStatus("Ticket and messages loaded.", "success");
+  } catch (err) {
+    console.error("Detail fetch error:", err);
+    setDetailStatus("Network or CORS error while loading ticket detail.", "error");
+  }
+}
+
+// ---------- Send ----------
+async function sendMessage() {
+  const { ticketId, userId } = getQueryParams();
+  const content = (messageInput?.value || "").trim();
+
+  if (!ticketId) {
+    setDetailStatus("Missing ticketId in URL.", "error");
+    return;
+  }
+
+  if (!content) {
+    setDetailStatus("Please type a message before sending.", "error");
+    return;
+  }
+
+  if (content.length > MAX_MESSAGE_LENGTH) {
+    setDetailStatus(`Message too long (max ${MAX_MESSAGE_LENGTH} chars).`, "error");
+    return;
+  }
+
+  setDetailStatus("Sending…", "info");
+
+  try {
+    const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId
+      },
+      body: JSON.stringify({ messageText: content })
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error("Send message error:", text);
+      setDetailStatus(`Error sending message (${resp.status}).`, "error");
+      return;
+    }
+
+    if (messageInput) messageInput.value = "";
+    setDetailStatus("Message sent.", "success");
+    await loadTicketAndMessages();
+  } catch (err) {
+    console.error("Send message network error:", err);
+    setDetailStatus("Network or CORS error while sending message.", "error");
+  }
+}
+
+// ---------- Wiring ----------
+document.addEventListener("DOMContentLoaded", () => {
+  if (messageInput) messageInput.maxLength = MAX_MESSAGE_LENGTH;
+  loadTicketAndMessages();
+});
+
+if (sendMessageBtn) {
+  sendMessageBtn.addEventListener("click", sendMessage);
+}
