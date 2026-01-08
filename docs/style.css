@@ -1,584 +1,311 @@
 /* =========================================================
-   The Winning Team — Executive Royal Theme (Square / Clean)
-   Single theme system: body.theme-day / body.theme-night
+   OLD-SCHOOL TECH THEME (Gray / Lime / Black / White)
+   Single theme system:
+   - body.theme-classic  (default)
+   - body.theme-lime     (alt mode)
    ========================================================= */
 
-/* =========================
-   Global Theme Tokens
-   ========================= */
-:root {
-  /* Day mode (royal purple + gold) */
-  --bg-main-day: #070017;
-  --bg-elevated-day: rgba(24, 0, 60, 0.96);
-  --bg-subtle-day: rgba(36, 0, 90, 0.85);
+:root{
+  --bg: #121417;
+  --bg-2: #171b20;
+  --panel: #1b2128;
+  --panel-2: #202833;
 
-  /* Night mode (royal blue) */
-  --bg-main-night: #020617;
-  --bg-elevated-night: rgba(15, 23, 42, 0.96);
-  --bg-subtle-night: rgba(15, 23, 42, 0.9);
+  --text: #f3f4f6;
+  --muted: #b6beca;
 
-  /* Accents */
-  --accent-purple: #8b5cf6;
-  --accent-purple-soft: rgba(139, 92, 246, 0.28);
+  --border: rgba(255,255,255,0.10);
+  --border-2: rgba(255,255,255,0.16);
 
-  --accent-blue: #1d4ed8;
-  --accent-blue-soft: rgba(37, 99, 235, 0.22);
+  --lime: #b6ff3b;
+  --lime-2: #74ff55;
 
-  --accent-gold: #fbbf24;
-  --accent-gold-soft: rgba(251, 191, 36, 0.18);
+  --danger: #ff6b6b;
 
-  /* Text & border */
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --text-soft: rgba(156, 163, 175, 0.95);
+  --shadow: 0 18px 40px rgba(0,0,0,0.55);
 
-  --border-subtle: rgba(148, 163, 184, 0.18);
-  --border-strong: rgba(148, 163, 184, 0.32);
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
 
-  --shadow-soft: 0 22px 40px rgba(0, 0, 0, 0.65);
-
-  /* EXEC: square-ish */
-  --radius-sm: 10px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text",
-    "Segoe UI", sans-serif;
-  --font-display: "Playfair Display", "Times New Roman", serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* =========================
-   Base
-   ========================= */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  color: var(--text-main);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-body {
-  /* default (day) */
+/* ---------- Base ---------- */
+html, body { height: 100%; }
+body{
+  margin:0;
+  font-family: var(--mono);
+  color: var(--text);
   background:
-    radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.22), transparent 55%),
-    radial-gradient(circle at 90% 0%, rgba(251, 191, 36, 0.14), transparent 60%),
-    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.10), transparent 55%),
-    linear-gradient(180deg, #080015 0%, #030009 60%, #000 100%);
+    radial-gradient(circle at 15% 0%, rgba(182,255,59,0.10), transparent 55%),
+    radial-gradient(circle at 85% 0%, rgba(255,255,255,0.06), transparent 55%),
+    linear-gradient(180deg, #0b0d10 0%, var(--bg) 60%, #090a0c 100%);
 }
 
-body.theme-night {
+/* Default theme class */
+body.theme-classic{
+  --bg: #121417;
+  --panel: #1b2128;
+  --panel-2: #202833;
+}
+
+/* Alt theme class (a bit punchier / “terminal lime”) */
+body.theme-lime{
   background:
-    radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.25), transparent 55%),
-    radial-gradient(circle at 90% 0%, rgba(59, 130, 246, 0.16), transparent 60%),
-    radial-gradient(circle at 85% 85%, rgba(37, 99, 235, 0.10), transparent 55%),
-    linear-gradient(180deg, #020617 0%, #000611 60%, #000 100%);
+    radial-gradient(circle at 15% 0%, rgba(182,255,59,0.18), transparent 60%),
+    radial-gradient(circle at 85% 0%, rgba(182,255,59,0.08), transparent 55%),
+    linear-gradient(180deg, #070a08 0%, #0f1310 70%, #070a08 100%);
 }
 
-/* =========================
-   Universal shell sizing (reduce empty space)
-   ========================= */
-.page-shell {
-  width: min(1400px, calc(100% - 3rem));
-  margin: 1.75rem auto 2.5rem;
-  position: relative;
-}
-
+/* ---------- Layout shells (reduce empty space) ---------- */
+.page-shell,
 .ticket-shell,
-.ticket-detail-shell {
-  width: min(1400px, calc(100% - 3rem));
-  margin: 1.75rem auto 2.5rem;
+.ticket-detail-shell{
+  width: min(1280px, calc(100% - 2rem));
+  margin: 1.25rem auto 2rem;
 }
 
-/* =========================
-   Main “room”
-   ========================= */
 .page-main,
 .ticket-shell,
-.ticket-detail-shell {
-  background: linear-gradient(
-    135deg,
-    rgba(8, 0, 24, 0.92),
-    rgba(6, 10, 30, 0.96)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: var(--shadow-soft);
-  border-radius: var(--radius-xl);
-  padding: 2rem 2.25rem;
-  backdrop-filter: blur(18px);
+.ticket-detail-shell{
+  background: rgba(20, 24, 29, 0.88);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--r-lg);
+  padding: 1.4rem 1.5rem;
+  backdrop-filter: blur(10px);
 }
 
-body.theme-night .page-main,
-body.theme-night .ticket-shell,
-body.theme-night .ticket-detail-shell {
-  background: linear-gradient(
-    135deg,
-    rgba(5, 10, 28, 0.92),
-    rgba(2, 6, 17, 0.96)
-  );
-}
-
-/* =========================
-   Typography
-   ========================= */
-h1,
-h2,
-h3,
-h4 {
-  margin: 0 0 0.4rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-h1 {
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-}
-
-h2 { font-size: 1.25rem; }
-h3 { font-size: 1.05rem; }
-
-p {
-  margin: 0.2rem 0;
-  line-height: 1.6;
-}
-
-.small-note,
-.mini {
-  font-size: 0.82rem;
-  color: var(--text-soft);
-}
-
-/* =========================
-   Sections
-   ========================= */
-.page-content { margin-top: 1.25rem; }
-
-.section {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.15rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-.section:last-of-type { border-bottom: none; }
-
-/* =========================
-   Header blocks (NO PILL)
-   ========================= */
+/* ---------- Headers (NO BIG PILL) ---------- */
 .site-header,
 .gallery-header,
-.ticket-header {
-  display: flex;
+.ticket-header{
+  display:flex;
   justify-content: space-between;
-  gap: 1.25rem;
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-strong);
-  background:
-    radial-gradient(circle at 15% 0%, rgba(251, 191, 36, 0.10), transparent 55%),
-    linear-gradient(120deg, rgba(12, 10, 43, 0.92), rgba(24, 0, 60, 0.94));
-}
-
-body.theme-night .site-header,
-body.theme-night .gallery-header,
-body.theme-night .ticket-header {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
-    linear-gradient(120deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 17, 0.96));
-}
-
-.header-left { flex: 1.4; }
-.header-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* =========================
-   Header actions row
-   ========================= */
-.header-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 1rem 0 1.25rem;
+  align-items: flex-start;
   gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background:
+    linear-gradient(180deg, rgba(32,40,51,0.92), rgba(27,33,40,0.88));
+}
+
+.header-left{ flex: 1.4; }
+.header-right{ flex: 1; color: var(--muted); }
+
+h1,h2,h3,h4{ margin:0 0 .4rem; font-weight: 700; letter-spacing: 0.02em; }
+h1{ font-size: 1.25rem; text-transform: uppercase; }
+h2{ font-size: 1.05rem; }
+h3{ font-size: 0.95rem; }
+
+p{ margin: .25rem 0; line-height: 1.6; }
+.mini, .small-note{ font-size: 0.82rem; color: var(--muted); }
+
+/* ---------- Action bars ---------- */
+.header-actions{
+  margin: 1rem 0 1.1rem;
+  display:flex;
+  justify-content: space-between;
+  gap: .8rem;
+  flex-wrap: wrap;
 }
 
 .header-actions-left,
-.header-actions-right {
-  display: flex;
-  align-items: center;
+.header-actions-right{
+  display:flex;
+  gap: .6rem;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  align-items: center;
 }
 
-/* =========================
-   Buttons (EXEC — less bubbly)
-   ========================= */
-button {
-  border-radius: 12px;
-  border: 1px solid rgba(251, 191, 36, 0.65);
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
-  color: #111827;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.45rem 0.9rem;
+/* ---------- Buttons (terminal vibe) ---------- */
+button{
+  font-family: var(--mono);
+  border-radius: 10px;
+  padding: .48rem .8rem;
+  border: 1px solid rgba(182,255,59,0.35);
+  background: rgba(182,255,59,0.10);
+  color: var(--text);
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.03em;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
 
-button.primary-cta {
-  padding-inline: 1.1rem;
-  background: linear-gradient(120deg, #fbbf24, #f97316);
-}
-
-button:hover { transform: translateY(-1px); filter: brightness(1.02); }
-button:active { transform: translateY(0); }
-
-/* Chips */
-.chip-row {
-  margin-top: 0.9rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.chip {
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  color: var(--text-soft);
-  padding: 0.32rem 0.75rem;
-  box-shadow: none;
-}
-.chip:hover { background: rgba(251, 191, 36, 0.08); color: #fefce8; }
-
-/* Volume control */
-.vol {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-  color: var(--text-soft);
-}
-.vol input[type="range"] { accent-color: #facc15; }
-
-/* =========================
-   Nav (EXEC, small gold buttons)
-   ========================= */
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 0.45rem;
-}
-
-/* replaces “Craigslist links” */
-.nav-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.28rem 0.75rem;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: rgba(255, 246, 231, 0.9);
-  background: rgba(15, 23, 42, 0.35);
-  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
-}
-
-.nav-pill:hover {
+button:hover{
   transform: translateY(-1px);
-  background: rgba(251, 191, 36, 0.08);
-  border-color: rgba(251, 191, 36, 0.7);
+  background: rgba(182,255,59,0.16);
+  border-color: rgba(182,255,59,0.55);
 }
 
-.nav-pill--active {
-  background: linear-gradient(135deg, #f9a826, #ffd56a);
-  color: #2b1200;
-  border-color: rgba(255, 213, 106, 0.9);
+button.primary-cta{
+  border-color: rgba(182,255,59,0.70);
+  background: rgba(182,255,59,0.18);
 }
 
-/* =========================
-   Lists & bullets
-   ========================= */
-.bullets {
-  margin: 0.4rem 0 0;
-  padding-left: 1.2rem;
-  font-size: 0.92rem;
-}
-.bullets li { margin-bottom: 0.35rem; }
-
-/* =========================
-   Fun panel & mini game
-   ========================= */
-.fun-panel {
-  margin-top: 0.7rem;
-  padding: 0.9rem 1rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background:
-    radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 70%),
-    rgba(15, 23, 42, 0.86);
+button.danger{
+  border-color: rgba(255,107,107,0.55);
+  background: rgba(255,107,107,0.10);
 }
 
-.cta-row {
-  margin-top: 0.6rem;
-  display: flex;
+a{ color: var(--lime); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+/* ---------- Top nav pills (small, not Craigslist) ---------- */
+.top-nav{
+  display:flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: .5rem;
+  margin-top: .35rem;
 }
 
-.mini-game {
-  margin-top: 0.9rem;
-  padding: 0.9rem 1rem;
-  border-radius: var(--radius-lg);
-  border: 1px dashed rgba(148, 163, 184, 0.35);
-  background: rgba(15, 23, 42, 0.82);
-}
-
-/* =========================
-   Showcase cards
-   ========================= */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.gallery-card {
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  background:
-    radial-gradient(circle at top, rgba(139, 92, 246, 0.14), transparent 62%),
-    rgba(15, 23, 42, 0.92);
-  padding: 0.95rem 1.05rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 185px;
-}
-
-.gallery-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  padding: 0.16rem 0.55rem;
+.nav-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: .28rem .65rem;
   border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.6);
-  background: rgba(251, 191, 36, 0.10);
-  margin-bottom: 0.45rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  text-transform: uppercase;
+  font-size: .72rem;
+  letter-spacing: .10em;
 }
 
-.gallery-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.4rem;
+.nav-pill:hover{
+  border-color: rgba(182,255,59,0.35);
+  background: rgba(182,255,59,0.08);
+  text-decoration: none;
 }
 
-/* =========================
-   Tickets table
-   ========================= */
-.table-wrapper {
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.90);
+.nav-pill--active{
+  border-color: rgba(182,255,59,0.65);
+  background: rgba(182,255,59,0.14);
+}
+
+/* ---------- Sections ---------- */
+.section{
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- Forms ---------- */
+label{ font-size: 0.82rem; color: var(--muted); }
+select, textarea{
+  font-family: var(--mono);
+  color: var(--text);
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: .5rem .6rem;
+  outline: none;
+}
+select:focus, textarea:focus{
+  border-color: rgba(182,255,59,0.55);
+}
+
+/* ---------- Table ---------- */
+.table-wrapper{
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--r-md);
   overflow: hidden;
+  background: rgba(0,0,0,0.18);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
+table{ width:100%; border-collapse: collapse; font-size: .82rem; }
+thead{
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+th, td{ padding: .6rem .75rem; text-align:left; }
+
+tbody tr{
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+tbody tr:hover{
+  background: rgba(182,255,59,0.06);
+}
+.clickable-row{ cursor: pointer; }
+
+/* ---------- Ticket detail cards ---------- */
+.ticket-meta-card{
+  margin-top: .8rem;
+  background: rgba(0,0,0,0.16);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--r-md);
+  padding: 1rem 1rem;
 }
 
-thead {
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.22), rgba(15, 23, 42, 0.98));
-}
-
-th, td {
-  padding: 0.55rem 0.7rem;
-  text-align: left;
-}
-
-tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.92); }
-tbody tr:nth-child(odd)  { background: rgba(9, 9, 24, 0.92); }
-
-tbody tr:hover { background: rgba(251, 191, 36, 0.08); }
-.clickable-row { cursor: pointer; }
-
-/* =========================
-   Ticket detail
-   ========================= */
-.ticket-meta-card {
-  margin-top: 0.9rem;
-  padding: 1.1rem 1.25rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background:
-    radial-gradient(circle at top left, rgba(251, 191, 36, 0.12), transparent 60%),
-    rgba(15, 23, 42, 0.94);
-}
-
-.ticket-meta-grid {
-  display: grid;
+.ticket-meta-grid{
+  display:grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.75rem 1rem;
-  font-size: 0.85rem;
+  gap: .75rem 1rem;
 }
 
-.messages-list {
-  margin-top: 0.75rem;
-  padding: 0.4rem 0;
-  display: flex;
+/* ---------- Messages ---------- */
+.messages-list{
+  margin-top: .85rem;
+  display:flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: .6rem;
 }
 
-.message-item {
-  padding: 0.6rem 0.8rem;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: rgba(7, 19, 52, 0.92);
-  font-size: 0.85rem;
+.message-item{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius: var(--r-md);
+  padding: .65rem .75rem;
 }
 
-.message-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-  margin-bottom: 0.25rem;
-  font-size: 0.72rem;
-  color: var(--text-soft);
-}
-
-.message-role {
+.message-header{
+  display:flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  font-size: .72rem;
+  color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 700;
+  letter-spacing: .08em;
+  margin-bottom: .25rem;
 }
 
-.message-system-tag {
-  margin-top: 0.2rem;
-  font-size: 0.68rem;
+.message-role{ color: var(--lime); font-weight: 700; }
+.message-system-tag{
+  margin-top: .25rem;
+  font-size: .70rem;
+  color: var(--lime);
+  opacity: .9;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(251, 191, 36, 0.9);
+  letter-spacing: .08em;
 }
 
-.message-composer {
-  margin-top: 0.9rem;
-  padding: 0.85rem 0.95rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.94);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* ---------- Status messages ---------- */
+.status-message{
+  margin-top: .5rem;
+  font-size: .82rem;
+  color: var(--muted);
 }
+.status-message.success{ color: var(--lime); }
+.status-message.error{ color: var(--danger); }
 
-.message-composer textarea {
-  width: 100%;
-  min-height: 90px;
-  resize: vertical;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 0.6rem 0.7rem;
-  background: rgba(2, 8, 30, 0.96);
-  color: var(--text-main);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-}
-
-.message-composer textarea::placeholder {
-  color: rgba(148, 163, 184, 0.7);
-}
-
-.primary-cta--wide { width: 100%; }
-
-/* =========================
-   Status messages
-   ========================= */
-.status-message {
-  margin-top: 0.35rem;
-  font-size: 0.82rem;
-  color: var(--text-soft);
-}
-.status-message.success { color: #22c55e; }
-.status-message.error   { color: #f97373; }
-
-/* =========================
-   Footer
-   ========================= */
-.site-footer {
-  margin-top: 1.5rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.16);
-  font-size: 0.78rem;
-  color: var(--text-soft);
-}
-
-.site-footer--compact {
-  margin-top: 2rem;
-  font-size: 0.76rem;
+/* ---------- Footer ---------- */
+.site-footer{
+  margin-top: 1.4rem;
+  padding-top: .9rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+  font-size: .78rem;
   text-align: right;
-  opacity: 0.82;
 }
 
-/* =========================
-   Accessibility helper
-   ========================= */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* =========================
-   Responsive tweaks
-   ========================= */
-@media (max-width: 900px) {
-  .page-shell,
-  .ticket-shell,
-  .ticket-detail-shell {
-    width: calc(100% - 1.5rem);
-    margin: 1.25rem auto 2rem;
+/* ---------- Responsive ---------- */
+@media (max-width: 900px){
+  .page-main, .ticket-shell, .ticket-detail-shell{
+    padding: 1.15rem 1.1rem;
   }
-
-  .page-main,
-  .ticket-shell,
-  .ticket-detail-shell {
-    padding: 1.35rem 1.2rem;
-    border-radius: 18px;
-  }
-
-  .site-header,
-  .gallery-header,
-  .ticket-header {
-    flex-direction: column;
-    align-items: flex-start;
-    border-radius: 16px;
-  }
-
-  .header-actions {
+  .site-header, .gallery-header, .ticket-header{
     flex-direction: column;
     align-items: flex-start;
   }
