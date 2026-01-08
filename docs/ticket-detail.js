@@ -1,19 +1,18 @@
 // ==============================================
 // The Winning Team — Ticket Detail Frontend
-// ticket-detail.js (FULL REWRITE - safe drop-in)
 // ==============================================
 
 const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
 const MAX_MESSAGE_LENGTH = 1200;
 
-// DOM
-const ticketMeta = document.getElementById("ticketMeta");
-const messagesList = document.getElementById("messagesList");
-const messageInput = document.getElementById("messageInput");
-const sendMessageBtn = document.getElementById("sendMessageBtn");
-const detailStatusEl = document.getElementById("detailStatus");
+function $(id) { return document.getElementById(id); }
 
-// ---------- Helpers ----------
+const ticketMeta = $("ticketMeta");
+const messagesList = $("messagesList");
+const messageInput = $("messageInput");
+const sendMessageBtn = $("sendMessageBtn");
+const detailStatus = $("detailStatus");
+
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -23,67 +22,44 @@ function getQueryParams() {
 }
 
 function setDetailStatus(message, type = "info") {
-  if (!detailStatusEl) return;
-
-  detailStatusEl.textContent = message || "";
-  detailStatusEl.className = "status status-message status--inline";
-
-  detailStatusEl.classList.remove("is-success", "is-error", "is-info");
-  if (type === "success") detailStatusEl.classList.add("is-success");
-  else if (type === "error") detailStatusEl.classList.add("is-error");
-  else detailStatusEl.classList.add("is-info");
+  if (!detailStatus) return;
+  detailStatus.textContent = message || "";
+  detailStatus.className = "status-message " + type;
 }
 
 function formatDate(isoString) {
   if (!isoString) return "";
-  try {
-    return new Date(isoString).toLocaleString();
-  } catch {
-    return isoString;
-  }
+  try { return new Date(isoString).toLocaleString(); } catch { return isoString; }
 }
 
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-// ---------- Renderers ----------
 function renderTicketMeta(ticket) {
   if (!ticketMeta) return;
 
   if (!ticket) {
-    ticketMeta.innerHTML = `<p class="muted">Ticket not found.</p>`;
+    ticketMeta.innerHTML = "<p class='small-note'>Ticket not found.</p>";
     return;
   }
-
-  const emergency =
-    ticket.isEmergency || (ticket.isEmergencyBool ? "EMERGENCY" : "NORMAL");
 
   ticketMeta.innerHTML = `
     <div class="ticket-meta-grid">
       <div>
-        <h4>${escapeHtml(ticket.title || "Untitled Ticket")}</h4>
-        <p><strong>ID:</strong> ${escapeHtml(ticket.ticketId || "")}</p>
-        <p><strong>Description:</strong> ${escapeHtml(ticket.description || "")}</p>
+        <h3>${ticket.title || "Untitled Ticket"}</h3>
+        <p><strong>ID:</strong> ${ticket.ticketId || ""}</p>
+        <p><strong>Description:</strong> ${ticket.description || ""}</p>
       </div>
       <div>
-        <p><strong>Status:</strong> ${escapeHtml(ticket.status || "")}</p>
-        <p><strong>Priority:</strong> ${escapeHtml(ticket.priority || "")}</p>
-        <p><strong>Emergency:</strong> ${escapeHtml(emergency)}</p>
+        <p><strong>Status:</strong> ${ticket.status || ""}</p>
+        <p><strong>Priority:</strong> ${ticket.priority || ""}</p>
+        <p><strong>Emergency:</strong> ${ticket.isEmergency || (ticket.isEmergencyBool ? "EMERGENCY" : "NORMAL")}</p>
       </div>
       <div>
-        <p><strong>Created By:</strong> ${escapeHtml(ticket.createdByUserId || "")}</p>
-        <p><strong>Assigned Tech:</strong> ${escapeHtml(ticket.assignedTechId || "—")}</p>
-        <p><strong>Assigned Group:</strong> ${escapeHtml(ticket.assignedGroupId || "—")}</p>
+        <p><strong>Created By:</strong> ${ticket.createdByUserId || ""}</p>
+        <p><strong>Assigned Tech:</strong> ${ticket.assignedTechId || "—"}</p>
+        <p><strong>Assigned Group:</strong> ${ticket.assignedGroupId || "—"}</p>
       </div>
       <div>
-        <p><strong>Created:</strong> ${escapeHtml(formatDate(ticket.createdAt))}</p>
-        <p><strong>Updated:</strong> ${escapeHtml(formatDate(ticket.updatedAt))}</p>
+        <p><strong>Created:</strong> ${formatDate(ticket.createdAt)}</p>
+        <p><strong>Updated:</strong> ${formatDate(ticket.updatedAt)}</p>
       </div>
     </div>
   `;
@@ -91,48 +67,43 @@ function renderTicketMeta(ticket) {
 
 function renderMessages(messages) {
   if (!messagesList) return;
-
   messagesList.innerHTML = "";
 
-  if (!Array.isArray(messages) || messages.length === 0) {
-    messagesList.innerHTML = `<p class="muted">No messages yet on this ticket.</p>`;
+  if (!messages || messages.length === 0) {
+    messagesList.innerHTML = "<p class='small-note'>No messages yet.</p>";
     return;
   }
 
   messages.forEach((m) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "message-item";
+    const div = document.createElement("div");
+    div.classList.add("message-item");
 
-    const roleLabel = m.senderRole || "USER";
-    const timeLabel = formatDate(m.timestamp);
-
-    wrapper.innerHTML = `
+    div.innerHTML = `
       <div class="message-header">
-        <span class="message-role">${escapeHtml(roleLabel)}</span>
-        <span class="message-sender">${escapeHtml(m.senderId || "")}</span>
-        <span class="message-time">${escapeHtml(timeLabel)}</span>
+        <span class="message-role">${(m.senderRole || "USER").toUpperCase()}</span>
+        <span>${m.senderId || ""}</span>
+        <span>${formatDate(m.timestamp)}</span>
       </div>
-      <div class="message-body">${escapeHtml(m.messageText || "")}</div>
-      ${m.isSystem ? `<div class="message-system-tag">System</div>` : ""}
+      <div>${(m.messageText || "").replaceAll("<","&lt;").replaceAll(">","&gt;")}</div>
+      ${m.isSystem ? "<div class='message-system-tag'>SYSTEM</div>" : ""}
     `;
 
-    messagesList.appendChild(wrapper);
+    messagesList.appendChild(div);
   });
 }
 
-// ---------- Loaders ----------
 async function loadTicketAndMessages() {
   const { ticketId, userId } = getQueryParams();
 
   if (!ticketId) {
-    if (ticketMeta) ticketMeta.innerHTML = `<p class="muted">No ticketId provided in URL.</p>`;
+    setDetailStatus("Missing ticketId in URL.", "error");
+    if (ticketMeta) ticketMeta.innerHTML = "<p class='small-note'>No ticketId provided.</p>";
     return;
   }
 
-  setDetailStatus("Loading ticket…", "info");
+  setDetailStatus("Loading ticket + messages...", "info");
 
   try {
-    // Ticket
     const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       method: "GET",
       headers: { "x-user-id": userId }
@@ -140,16 +111,14 @@ async function loadTicketAndMessages() {
 
     if (!ticketResp.ok) {
       const text = await ticketResp.text();
-      console.error("Ticket error:", text);
+      console.error("Ticket detail API error:", ticketResp.status, text);
       setDetailStatus(`Error loading ticket (${ticketResp.status}).`, "error");
-      if (ticketMeta) ticketMeta.innerHTML = `<p class="muted">Could not load ticket details.</p>`;
       return;
     }
 
     const ticket = await ticketResp.json();
     renderTicketMeta(ticket);
 
-    // Messages
     const msgResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
       method: "GET",
       headers: { "x-user-id": userId }
@@ -157,8 +126,8 @@ async function loadTicketAndMessages() {
 
     if (!msgResp.ok) {
       const text = await msgResp.text();
-      console.error("Messages error:", text);
-      setDetailStatus(`Loaded ticket, but error loading messages (${msgResp.status}).`, "error");
+      console.error("Messages API error:", msgResp.status, text);
+      setDetailStatus(`Ticket loaded, messages failed (${msgResp.status}).`, "error");
       return;
     }
 
@@ -166,34 +135,23 @@ async function loadTicketAndMessages() {
     const items = Array.isArray(msgData.messages) ? msgData.messages : [];
     renderMessages(items);
 
-    setDetailStatus("Ticket and messages loaded.", "success");
+    setDetailStatus("Loaded.", "success");
   } catch (err) {
-    console.error("Detail fetch error:", err);
-    setDetailStatus("Network or CORS error while loading ticket detail.", "error");
+    console.error("Detail load error:", err);
+    setDetailStatus("Network/CORS error. Open console.", "error");
   }
 }
 
-// ---------- Send ----------
 async function sendMessage() {
   const { ticketId, userId } = getQueryParams();
-  const content = (messageInput?.value || "").trim();
+  const content = (messageInput ? messageInput.value.trim() : "");
 
-  if (!ticketId) {
-    setDetailStatus("Missing ticketId in URL.", "error");
-    return;
-  }
-
-  if (!content) {
-    setDetailStatus("Please type a message before sending.", "error");
-    return;
-  }
-
+  if (!content) return setDetailStatus("Type a message first.", "error");
   if (content.length > MAX_MESSAGE_LENGTH) {
-    setDetailStatus(`Message too long (max ${MAX_MESSAGE_LENGTH} chars).`, "error");
-    return;
+    return setDetailStatus(`Too long (max ${MAX_MESSAGE_LENGTH}).`, "error");
   }
 
-  setDetailStatus("Sending…", "info");
+  setDetailStatus("Sending...", "info");
 
   try {
     const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
@@ -207,26 +165,22 @@ async function sendMessage() {
 
     if (!resp.ok) {
       const text = await resp.text();
-      console.error("Send message error:", text);
-      setDetailStatus(`Error sending message (${resp.status}).`, "error");
+      console.error("Send message API error:", resp.status, text);
+      setDetailStatus(`Send failed (${resp.status}).`, "error");
       return;
     }
 
     if (messageInput) messageInput.value = "";
-    setDetailStatus("Message sent.", "success");
+    setDetailStatus("Sent.", "success");
     await loadTicketAndMessages();
   } catch (err) {
-    console.error("Send message network error:", err);
-    setDetailStatus("Network or CORS error while sending message.", "error");
+    console.error("Send message error:", err);
+    setDetailStatus("Network/CORS error sending message.", "error");
   }
 }
 
-// ---------- Wiring ----------
 document.addEventListener("DOMContentLoaded", () => {
   if (messageInput) messageInput.maxLength = MAX_MESSAGE_LENGTH;
+  if (sendMessageBtn) sendMessageBtn.addEventListener("click", sendMessage);
   loadTicketAndMessages();
 });
-
-if (sendMessageBtn) {
-  sendMessageBtn.addEventListener("click", sendMessage);
-}
