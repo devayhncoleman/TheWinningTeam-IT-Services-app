@@ -1,0 +1,365 @@
+/* =========================================================
+   Ticket App UI Layer (Product Skin)
+   Keeps your base palette — leans executive / modern.
+   ========================================================= */
+
+/* Theme tokens (works with data-theme="day" or "night") */
+:root {
+  --bg: #0b0612;
+  --panel: rgba(12, 9, 22, 0.70);
+  --panel-solid: #0f0b1c;
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.68);
+  --line: rgba(255,255,255,0.10);
+
+  /* your gold */
+  --gold: #d2a84b;
+  --gold-2: #b8872f;
+
+  /* your blues (night-mode anchor) */
+  --blue-1: rgba(10, 45, 120, 0.55);
+  --blue-2: rgba(8, 24, 60, 0.85);
+
+  /* your purples (day-mode anchor) */
+  --purple-1: rgba(92, 35, 135, 0.55);
+  --purple-2: rgba(22, 8, 38, 0.90);
+
+  --shadow: 0 18px 60px rgba(0,0,0,0.55);
+  --radius: 10px; /* squarer than pills */
+}
+
+/* Day mode = purple/gold vibe */
+html[data-theme="day"] {
+  --bg: #0b0612;
+  --panel: rgba(18, 10, 30, 0.70);
+  --panel-solid: #120a1e;
+  --accent-wash: radial-gradient(1200px 700px at 35% 20%, var(--purple-1), transparent 55%),
+                 radial-gradient(900px 600px at 70% 75%, rgba(210,168,75,0.12), transparent 55%),
+                 linear-gradient(180deg, var(--purple-2), #05030a 70%);
+}
+
+/* Night mode = blue/gold vibe */
+html[data-theme="night"] {
+  --bg: #05070f;
+  --panel: rgba(8, 16, 36, 0.70);
+  --panel-solid: #070f22;
+  --accent-wash: radial-gradient(1200px 700px at 35% 20%, var(--blue-1), transparent 55%),
+                 radial-gradient(900px 600px at 70% 75%, rgba(210,168,75,0.10), transparent 55%),
+                 linear-gradient(180deg, var(--blue-2), #04030a 72%);
+}
+
+/* Page canvas: removes “two empty columns” by using a wide centered app */
+body {
+  background: var(--accent-wash);
+  color: var(--text);
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Topbar */
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.20);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-topbar__left,
+.app-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-topbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+/* Brand */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand__mark {
+  width: 12px;
+  height: 12px;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(210,168,75,0.12);
+}
+
+.brand__text {
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+/* Nav: no “Craigslist links” */
+.app-nav {
+  display: flex;
+  gap: 10px;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  margin-left: 6px;
+}
+
+.app-nav__link {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+}
+
+.app-nav__link:hover {
+  color: var(--text);
+  border-color: var(--line);
+  background: rgba(255,255,255,0.04);
+}
+
+.app-nav__link.is-active {
+  color: var(--text);
+  border-color: rgba(210,168,75,0.35);
+  background: rgba(210,168,75,0.08);
+}
+
+/* Main width */
+.app-main {
+  width: min(1100px, calc(100% - 28px));
+  margin: 22px auto 30px;
+  display: grid;
+  gap: 16px;
+}
+
+.app-main--detail {
+  width: min(1100px, calc(100% - 28px));
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 16px 16px;
+}
+
+.panel--hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.panel__header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.panel__title h1,
+.h1, h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+}
+
+.h2, h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.35;
+}
+
+code {
+  background: rgba(255,255,255,0.06);
+  padding: 0 6px;
+  border: 1px solid var(--line);
+}
+
+/* Badges */
+.hero-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.badge {
+  font-size: 0.78rem;
+  color: var(--text);
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  padding: 6px 10px;
+}
+
+/* Controls */
+.controls-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+select, textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+  border-radius: 0; /* squared */
+}
+
+select:focus, textarea:focus {
+  border-color: rgba(210,168,75,0.5);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 0; /* squared */
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  color: var(--text);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.btn--ghost {
+  border-color: rgba(255,255,255,0.14);
+}
+
+.btn--primary {
+  border-color: rgba(210,168,75,0.55);
+  background: linear-gradient(180deg, rgba(210,168,75,0.20), rgba(210,168,75,0.06));
+}
+
+.btn--primary:hover {
+  border-color: rgba(210,168,75,0.80);
+}
+
+.btn--wide { width: 100%; }
+
+/* Status */
+.status {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.22);
+  min-height: 18px;
+  color: var(--muted);
+}
+
+.status--inline {
+  margin-top: 10px;
+}
+
+/* Table */
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.18);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.table th, .table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.table thead th {
+  color: var(--muted);
+  font-weight: 600;
+  background: rgba(255,255,255,0.03);
+}
+
+.table tbody tr:hover {
+  background: rgba(210,168,75,0.05);
+  cursor: pointer;
+}
+
+/* Ticket meta */
+.ticket-meta {
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.18);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+/* Chat */
+.chat {
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.18);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.composer {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.composer__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.composer__count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Footer */
+.app-footer {
+  border-top: 1px solid var(--line);
+  padding: 14px 18px;
+  color: var(--muted);
+  background: rgba(0,0,0,0.20);
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .panel--hero { flex-direction: column; }
+  .controls-row { grid-template-columns: 1fr; }
+  .app-nav { flex-wrap: wrap; }
+}
