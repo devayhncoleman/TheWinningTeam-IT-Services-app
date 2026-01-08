@@ -114,12 +114,12 @@
   </div>
 
   <!-- Theme persistence FIRST (new, minimal, reliable) -->
-  <script src="theme.js"></script>
+  <script src="theme.js?v=9"></script>
 
   <!-- Your existing global JS can stay (music, etc) -->
-  <script src="script.js"></script>
+  <script src="script.js?v=9"></script>
 
   <!-- Ticket logic -->
-  <script src="tickets.js"></script>
+  <script src="tickets.js?v=9"></script>
 </body>
 </html>
