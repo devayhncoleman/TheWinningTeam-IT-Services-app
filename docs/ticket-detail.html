@@ -1,107 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="day">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>The Winning Team — Ticket Detail</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="tickets-ui.css" />
+  <link rel="stylesheet" href="style.css?v=9" />
 </head>
+<body class="theme-classic">
+  <div class="ticket-detail-shell">
 
-<body>
-  <div class="app-shell">
-    <header class="app-topbar">
-      <div class="app-topbar__left">
-        <a class="brand" href="index.html" aria-label="Back to Home">
-          <span class="brand__mark"></span>
-          <span class="brand__text">The Winning Team</span>
-        </a>
+    <header class="ticket-header">
+      <div class="ticket-title-block">
+        <h1 class="ticket-title">Ticket Detail</h1>
 
-        <nav class="app-nav" aria-label="Primary">
-          <a class="app-nav__link" href="index.html">Home</a>
-          <a class="app-nav__link" href="Showcase.html">Showcase</a>
-          <a class="app-nav__link is-active" href="tickets.html">Ticket App</a>
+        <nav class="top-nav">
+          <a href="index.html" class="nav-pill">Home</a>
+          <a href="Showcase.html" class="nav-pill">Showcase</a>
+          <a href="tickets.html" class="nav-pill nav-pill--active">Ticket App</a>
         </nav>
+
+        <p class="mini">Loads 1 ticket + message history • Posts new messages</p>
       </div>
 
-      <div class="app-topbar__right">
-        <button id="toggleThemeBtn" class="btn btn--ghost" type="button">
-          Mode: <span id="themeLabel">Day</span>
-        </button>
+      <div class="ticket-header-actions">
+        <button id="toggleNightShift" type="button">Lime Mode</button>
       </div>
     </header>
 
-    <main class="app-main app-main--detail">
-      <!-- Ticket overview -->
-      <section class="panel">
-        <div class="panel__header">
-          <h1 class="h1">Ticket Overview</h1>
-          <p class="muted">Loads the ticket and message history from the live AWS backend.</p>
-        </div>
+    <main class="ticket-main">
 
-        <div id="ticketMeta" class="ticket-meta">
-          <!-- ticket fields rendered here by ticket-detail.js -->
-        </div>
+      <section class="section">
+        <h2>Ticket Overview</h2>
+        <div id="ticketMeta" class="ticket-meta-card"></div>
+        <div id="detailStatus" class="status-message"></div>
       </section>
 
-      <!-- Messages + Composer -->
-      <section class="panel">
-        <div class="panel__header">
-          <h2 class="h2">Messages</h2>
-          <p class="muted">Conversation is ordered by timestamp (DynamoDB sort key).</p>
-        </div>
+      <section class="section">
+        <h3>Messages</h3>
+        <div id="messagesList" class="messages-list"></div>
 
-        <div id="messagesList" class="chat">
-          <!-- messages rendered here -->
-        </div>
-
-        <div class="composer">
-          <div class="composer__top">
-            <label for="messageInput">Add a message</label>
-            <div class="composer__count">
-              <span id="charCount">0</span>/1200
-            </div>
-          </div>
-
-          <textarea
-            id="messageInput"
-            rows="4"
-            maxlength="1200"
-            placeholder="Write your message… (max 1200 characters)"
-          ></textarea>
-
-          <div class="composer__actions">
-            <button id="sendMessageBtn" type="button" class="btn btn--primary btn--wide">
-              Send Message
-            </button>
-          </div>
-
-          <div id="detailStatus" class="status status--inline"></div>
-        </div>
+        <form class="message-composer" onsubmit="return false;">
+          <label for="messageInput" class="sr-only">Add a message</label>
+          <textarea id="messageInput" rows="4" placeholder="Type your message…"></textarea>
+          <button id="sendMessageBtn" class="primary-cta" type="button">Send Message</button>
+        </form>
       </section>
+
     </main>
 
-    <footer class="app-footer">
+    <footer class="site-footer">
       <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
     </footer>
   </div>
 
-  <script src="theme.js"></script>
-  <script src="script.js"></script>
-  <script src="ticket-detail.js"></script>
-
-  <!-- small, safe enhancement: live character counter -->
-  <script>
-    (function () {
-      const input = document.getElementById("messageInput");
-      const counter = document.getElementById("charCount");
-      if (!input || !counter) return;
-
-      const update = () => { counter.textContent = String(input.value.length || 0); };
-      input.addEventListener("input", update);
-      update();
-    })();
-  </script>
+  <script src="script.js?v=9"></script>
+  <script src="ticket-detail.js?v=9"></script>
 </body>
 </html>
