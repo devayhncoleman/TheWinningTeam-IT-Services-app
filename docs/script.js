@@ -1,45 +1,47 @@
 // =======================================
-// Global Theme (Classic <-> Lime)
-// Works on: index.html, Showcase.html,
-// tickets.html, ticket-detail.html
+// Global helpers (shared across pages)
 // =======================================
 
-const THEME_KEY = "dw-theme-v2"; // new key to avoid older saved values
+const TEAM_USER_KEY = "dw-active-user";
 
-function applyTheme(mode) {
-  const body = document.body;
-
-  if (mode !== "classic" && mode !== "lime") mode = "classic";
-
-  body.classList.remove("theme-classic", "theme-lime");
-  body.classList.add(mode === "lime" ? "theme-lime" : "theme-classic");
-
-  // persist
-  try { localStorage.setItem(THEME_KEY, mode); } catch (_) {}
-
-  // update toggle label (same id across all pages)
-  const btn = document.getElementById("toggleNightShift");
-  if (btn) {
-    btn.textContent = mode === "lime" ? "Classic Mode" : "Lime Mode";
-  }
+function setActiveUser(userId) {
+  try { localStorage.setItem(TEAM_USER_KEY, userId); } catch (_) {}
 }
 
-function initTheme() {
-  let mode = "classic";
+function getActiveUser(defaultUser = "customer_ashley") {
   try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === "classic" || stored === "lime") mode = stored;
-  } catch (_) {}
-
-  applyTheme(mode);
-
-  const btn = document.getElementById("toggleNightShift");
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const isLime = document.body.classList.contains("theme-lime");
-      applyTheme(isLime ? "classic" : "lime");
-    });
+    const v = localStorage.getItem(TEAM_USER_KEY);
+    return v || defaultUser;
+  } catch (_) {
+    return defaultUser;
   }
 }
 
-document.addEventListener("DOMContentLoaded", initTheme);
+function formatDate(isoString) {
+  if (!isoString) return "";
+  try { return new Date(isoString).toLocaleString(); }
+  catch { return isoString; }
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Shorten long DynamoDB-ish ids for display (keeps full id intact in data)
+function shortId(id, head = 10, tail = 6) {
+  const s = String(id || "");
+  if (s.length <= head + tail + 3) return s;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
+}
+
+// Lightweight role guess (for UI only)
+function roleFromUserId(userId) {
+  const u = String(userId || "").toLowerCase();
+  if (u.startsWith("admin_")) return "ADMIN";
+  if (u.startsWith("tech_")) return "TECH";
+  if (u.startsWith("customer_")) return "CUSTOMER";
+  return "USER";
+}
