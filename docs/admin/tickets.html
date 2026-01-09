@@ -34,6 +34,7 @@
             <select id="status" class="input">
               <option value="">All</option>
               <option value="OPEN">OPEN</option>
+              <option value="IN_REVIEW">IN_REVIEW</option>
               <option value="IN_PROGRESS">IN_PROGRESS</option>
               <option value="RESOLVED">RESOLVED</option>
             </select>
@@ -49,12 +50,12 @@
         <h2>Mode</h2>
         <p class="sub">
           This page calls <code style="color:var(--lime)">GET /admin/tickets</code>.
-          If you haven’t deployed the admin lambda/routes yet, refresh will fail — that’s expected.
         </p>
         <div class="kpi">
           <span class="sub">Loaded</span>
           <b id="count">0</b>
         </div>
+        <p id="hint" class="sub" style="margin-top:10px"></p>
       </div>
     </div>
 
@@ -86,12 +87,27 @@
     const search = document.getElementById("search");
     const status = document.getElementById("status");
     const refresh = document.getElementById("refresh");
+    const hint = document.getElementById("hint");
 
     let all = [];
 
+    function normalizeTickets(data) {
+      // We now support ANY of these return shapes:
+      // 1) [ ... ]
+      // 2) { tickets: [ ... ] }
+      // 3) { items: [ ... ] }   <-- your Admin Lambda returns this
+      // 4) { Items: [ ... ] }   (sometimes people do this by accident)
+      if (Array.isArray(data)) return data;
+      if (!data || typeof data !== "object") return [];
+      if (Array.isArray(data.items)) return data.items;
+      if (Array.isArray(data.tickets)) return data.tickets;
+      if (Array.isArray(data.Items)) return data.Items;
+      return [];
+    }
+
     function render() {
       const q = (search.value || "").toLowerCase().trim();
-      const s = status.value;
+      const s = (status.value || "").toUpperCase();
 
       const filtered = all.filter(t => {
         const hay = [
@@ -116,9 +132,13 @@
         const pr = escapeHtml(t.priority || "—");
         const asg = escapeHtml(t.assignedTechId || t.assignedGroupId || "—");
         const upd = escapeHtml(formatIso(t.updatedAt || t.createdAt));
+
         return `
           <tr>
-            <td><a href="./ticket-detail.html?ticketId=${encodeURIComponent(t.ticketId)}">${id}</a><br><span class="sub">${escapeHtml(t.title || "")}</span></td>
+            <td>
+              <a href="./ticket-detail.html?ticketId=${encodeURIComponent(t.ticketId)}">${id}</a><br>
+              <span class="sub">${escapeHtml(t.title || "")}</span>
+            </td>
             <td>${st}</td>
             <td>${pr}</td>
             <td>${asg}</td>
@@ -130,6 +150,8 @@
 
     async function load() {
       rows.innerHTML = `<tr><td colspan="5" class="sub">Loading…</td></tr>`;
+      hint.textContent = "";
+
       const { userId } = getDevIdentity("admin");
 
       try {
@@ -138,9 +160,16 @@
           "Admin routes not deployed yet. Deploy /admin/tickets to enable the queue."
         );
 
-        // Expected: { tickets: [...] } or just [...]
-        all = Array.isArray(data) ? data : (data.tickets || []);
-        toast(`Loaded ${all.length} tickets`, "info");
+        all = normalizeTickets(data);
+
+        if (!all.length) {
+          hint.textContent =
+            "Loaded 0 tickets. If PowerShell shows tickets, open DevTools → Network and confirm this page is calling /admin/tickets and receiving { items: [...] }.";
+        } else {
+          hint.textContent = "";
+        }
+
+        toast(`Loaded ${all.length} ticket(s)`, "info");
       } catch (e) {
         all = [];
         rows.innerHTML = `<tr><td colspan="5" class="sub">Failed to load admin queue: ${escapeHtml(e.message)}</td></tr>`;
@@ -159,3 +188,4 @@
   </script>
 </body>
 </html>
+
