@@ -1,312 +1,232 @@
-/* =========================================================
-   OLD-SCHOOL TECH THEME (Gray / Lime / Black / White)
-   Single theme system:
-   - body.theme-classic  (default)
-   - body.theme-lime     (alt mode)
-   ========================================================= */
+// ==============================================
+// The Winning Team — Ticket Detail Frontend
+// ==============================================
 
-:root{
-  --bg: #121417;
-  --bg-2: #171b20;
-  --panel: #1b2128;
-  --panel-2: #202833;
+const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
+const MAX_MESSAGE_LENGTH = 1200;
 
-  --text: #f3f4f6;
-  --muted: #b6beca;
+// DOM
+const ticketMeta = document.getElementById("ticketMeta");
+const messagesList = document.getElementById("messagesList");
+const messageInput = document.getElementById("messageInput");
+const sendMessageBtn = document.getElementById("sendMessageBtn");
+const detailStatus = document.getElementById("detailStatus");
 
-  --border: rgba(255,255,255,0.10);
-  --border-2: rgba(255,255,255,0.16);
-
-  --lime: #b6ff3b;
-  --lime-2: #74ff55;
-
-  --danger: #ff6b6b;
-
-  --shadow: 0 18px 40px rgba(0,0,0,0.55);
-
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 18px;
-
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+function setDetailStatus(message, type = "info") {
+  if (!detailStatus) return;
+  detailStatus.textContent = message || "";
+  detailStatus.className = "status " + (type === "success" ? "ok" : type === "error" ? "err" : "");
 }
 
-/* ---------- Base ---------- */
-html, body { height: 100%; }
-body{
-  margin:0;
-  font-family: var(--mono);
-  color: var(--text);
-  background:
-    radial-gradient(circle at 15% 0%, rgba(182,255,59,0.10), transparent 55%),
-    radial-gradient(circle at 85% 0%, rgba(255,255,255,0.06), transparent 55%),
-    linear-gradient(180deg, #0b0d10 0%, var(--bg) 60%, #090a0c 100%);
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    ticketId: params.get("ticketId"),
+    userId: params.get("userId") || getActiveUser("customer_ashley")
+  };
 }
 
-/* Default theme class */
-body.theme-classic{
-  --bg: #121417;
-  --panel: #1b2128;
-  --panel-2: #202833;
+function emergencyLabel(ticket) {
+  const flag = ticket.isEmergency || "";
+  const bool = ticket.isEmergencyBool;
+  return flag || (bool ? "EMERGENCY" : "NORMAL");
 }
 
-/* Alt theme class (a bit punchier / “terminal lime”) */
-body.theme-lime{
-  background:
-    radial-gradient(circle at 15% 0%, rgba(182,255,59,0.18), transparent 60%),
-    radial-gradient(circle at 85% 0%, rgba(182,255,59,0.08), transparent 55%),
-    linear-gradient(180deg, #070a08 0%, #0f1310 70%, #070a08 100%);
-}
+function renderTicketMeta(ticket) {
+  if (!ticketMeta) return;
 
-/* ---------- Layout shells (reduce empty space) ---------- */
-.page-shell,
-.ticket-shell,
-.ticket-detail-shell{
-  width: min(1280px, calc(100% - 2rem));
-  margin: 1.25rem auto 2rem;
-}
-
-.page-main,
-.ticket-shell,
-.ticket-detail-shell{
-  background: rgba(20, 24, 29, 0.88);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  border-radius: var(--r-lg);
-  padding: 1.4rem 1.5rem;
-  backdrop-filter: blur(10px);
-}
-
-/* ---------- Headers (NO BIG PILL) ---------- */
-.site-header,
-.gallery-header,
-.ticket-header{
-  display:flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem 1.1rem;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border-2);
-  background:
-    linear-gradient(180deg, rgba(32,40,51,0.92), rgba(27,33,40,0.88));
-}
-
-.header-left{ flex: 1.4; }
-.header-right{ flex: 1; color: var(--muted); }
-
-h1,h2,h3,h4{ margin:0 0 .4rem; font-weight: 700; letter-spacing: 0.02em; }
-h1{ font-size: 1.25rem; text-transform: uppercase; }
-h2{ font-size: 1.05rem; }
-h3{ font-size: 0.95rem; }
-
-p{ margin: .25rem 0; line-height: 1.6; }
-.mini, .small-note{ font-size: 0.82rem; color: var(--muted); }
-
-/* ---------- Action bars ---------- */
-.header-actions{
-  margin: 1rem 0 1.1rem;
-  display:flex;
-  justify-content: space-between;
-  gap: .8rem;
-  flex-wrap: wrap;
-}
-
-.header-actions-left,
-.header-actions-right{
-  display:flex;
-  gap: .6rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-/* ---------- Buttons (terminal vibe) ---------- */
-button{
-  font-family: var(--mono);
-  border-radius: 10px;
-  padding: .48rem .8rem;
-  border: 1px solid rgba(182,255,59,0.35);
-  background: rgba(182,255,59,0.10);
-  color: var(--text);
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-}
-
-button:hover{
-  transform: translateY(-1px);
-  background: rgba(182,255,59,0.16);
-  border-color: rgba(182,255,59,0.55);
-}
-
-button.primary-cta{
-  border-color: rgba(182,255,59,0.70);
-  background: rgba(182,255,59,0.18);
-}
-
-button.danger{
-  border-color: rgba(255,107,107,0.55);
-  background: rgba(255,107,107,0.10);
-}
-
-a{ color: var(--lime); text-decoration: none; }
-a:hover{ text-decoration: underline; }
-
-/* ---------- Top nav pills (small, not Craigslist) ---------- */
-.top-nav{
-  display:flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin-top: .35rem;
-}
-
-.nav-pill{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: .28rem .65rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  text-transform: uppercase;
-  font-size: .72rem;
-  letter-spacing: .10em;
-}
-
-.nav-pill:hover{
-  border-color: rgba(182,255,59,0.35);
-  background: rgba(182,255,59,0.08);
-  text-decoration: none;
-}
-
-.nav-pill--active{
-  border-color: rgba(182,255,59,0.65);
-  background: rgba(182,255,59,0.14);
-}
-
-/* ---------- Sections ---------- */
-.section{
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-/* ---------- Forms ---------- */
-label{ font-size: 0.82rem; color: var(--muted); }
-select, textarea{
-  font-family: var(--mono);
-  color: var(--text);
-  background: rgba(0,0,0,0.22);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: .5rem .6rem;
-  outline: none;
-}
-select:focus, textarea:focus{
-  border-color: rgba(182,255,59,0.55);
-}
-
-/* ---------- Table ---------- */
-.table-wrapper{
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  background: rgba(0,0,0,0.18);
-}
-
-table{ width:100%; border-collapse: collapse; font-size: .82rem; }
-thead{
-  background: rgba(255,255,255,0.05);
-  border-bottom: 1px solid rgba(255,255,255,0.10);
-}
-th, td{ padding: .6rem .75rem; text-align:left; }
-
-tbody tr{
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-tbody tr:hover{
-  background: rgba(182,255,59,0.06);
-}
-.clickable-row{ cursor: pointer; }
-
-/* ---------- Ticket detail cards ---------- */
-.ticket-meta-card{
-  margin-top: .8rem;
-  background: rgba(0,0,0,0.16);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--r-md);
-  padding: 1rem 1rem;
-}
-
-.ticket-meta-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: .75rem 1rem;
-}
-
-/* ---------- Messages ---------- */
-.messages-list{
-  margin-top: .85rem;
-  display:flex;
-  flex-direction: column;
-  gap: .6rem;
-}
-
-.message-item{
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  border-radius: var(--r-md);
-  padding: .65rem .75rem;
-}
-
-.message-header{
-  display:flex;
-  flex-wrap: wrap;
-  gap: .6rem;
-  font-size: .72rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: .25rem;
-}
-
-.message-role{ color: var(--lime); font-weight: 700; }
-.message-system-tag{
-  margin-top: .25rem;
-  font-size: .70rem;
-  color: var(--lime);
-  opacity: .9;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-/* ---------- Status messages ---------- */
-.status-message{
-  margin-top: .5rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-.status-message.success{ color: var(--lime); }
-.status-message.error{ color: var(--danger); }
-
-/* ---------- Footer ---------- */
-.site-footer{
-  margin-top: 1.4rem;
-  padding-top: .9rem;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  color: var(--muted);
-  font-size: .78rem;
-  text-align: right;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 900px){
-  .page-main, .ticket-shell, .ticket-detail-shell{
-    padding: 1.15rem 1.1rem;
+  if (!ticket) {
+    ticketMeta.innerHTML = `<div class="k">Ticket not found.</div>`;
+    return;
   }
-  .site-header, .gallery-header, .ticket-header{
-    flex-direction: column;
-    align-items: flex-start;
+
+  ticketMeta.innerHTML = `
+    <div class="meta-grid">
+      <div>
+        <div class="k">TITLE</div>
+        <div class="v">${ticket.title || "Untitled Ticket"}</div>
+      </div>
+      <div>
+        <div class="k">TICKET ID</div>
+        <div class="v">${ticket.ticketId || ""}</div>
+      </div>
+
+      <div>
+        <div class="k">STATUS</div>
+        <div class="v">${ticket.status || ""}</div>
+      </div>
+      <div>
+        <div class="k">PRIORITY</div>
+        <div class="v">${ticket.priority || ""}</div>
+      </div>
+
+      <div>
+        <div class="k">EMERGENCY</div>
+        <div class="v">${emergencyLabel(ticket)}</div>
+      </div>
+      <div>
+        <div class="k">CREATED BY</div>
+        <div class="v">${ticket.createdByUserId || ""}</div>
+      </div>
+
+      <div>
+        <div class="k">ASSIGNED TECH</div>
+        <div class="v">${ticket.assignedTechId || "—"}</div>
+      </div>
+      <div>
+        <div class="k">ASSIGNED GROUP</div>
+        <div class="v">${ticket.assignedGroupId || "—"}</div>
+      </div>
+
+      <div>
+        <div class="k">CREATED</div>
+        <div class="v">${formatDate(ticket.createdAt)}</div>
+      </div>
+      <div>
+        <div class="k">UPDATED</div>
+        <div class="v">${formatDate(ticket.updatedAt)}</div>
+      </div>
+
+      <div style="grid-column: 1 / -1;">
+        <div class="k">DESCRIPTION</div>
+        <div class="v">${ticket.description || ""}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMessages(messages) {
+  if (!messagesList) return;
+
+  messagesList.innerHTML = "";
+
+  if (!messages || messages.length === 0) {
+    messagesList.innerHTML = `<div class="k">No messages yet.</div>`;
+    return;
   }
+
+  messages.forEach((m) => {
+    const div = document.createElement("div");
+    div.className = "msg";
+
+    const role = (m.senderRole || "USER").toUpperCase();
+    const sender = m.senderId || "";
+    const time = formatDate(m.timestamp);
+
+    div.innerHTML = `
+      <div class="msg-head">
+        <span class="badge">${role}</span>
+        <span>${sender}</span>
+        <span style="margin-left:auto;">${time}</span>
+      </div>
+      <div class="msg-body">${(m.messageText || "").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
+    `;
+
+    messagesList.appendChild(div);
+  });
+}
+
+async function loadTicketAndMessages() {
+  const { ticketId, userId } = getQueryParams();
+
+  if (!ticketId) {
+    if (ticketMeta) ticketMeta.innerHTML = `<div class="k">No ticketId provided in URL.</div>`;
+    return;
+  }
+
+  setActiveUser(userId);
+  setDetailStatus("Loading ticket + messages...", "info");
+
+  try {
+    // Ticket
+    const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
+      method: "GET",
+      headers: { "x-user-id": userId }
+    });
+
+    if (!ticketResp.ok) {
+      const text = await ticketResp.text();
+      console.error("Ticket detail error:", ticketResp.status, text);
+      setDetailStatus(`Error loading ticket (${ticketResp.status}).`, "error");
+      return;
+    }
+
+    const ticket = await ticketResp.json();
+    renderTicketMeta(ticket);
+
+    // Messages
+    const msgResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
+      method: "GET",
+      headers: { "x-user-id": userId }
+    });
+
+    if (!msgResp.ok) {
+      const text = await msgResp.text();
+      console.error("Messages error:", msgResp.status, text);
+      setDetailStatus(
+        `Ticket loaded, but messages failed (${msgResp.status}). Usually CORS if PowerShell works.`,
+        "error"
+      );
+      return;
+    }
+
+    const msgData = await msgResp.json();
+    const items = Array.isArray(msgData.messages) ? msgData.messages : [];
+    renderMessages(items);
+
+    setDetailStatus("Loaded.", "success");
+  } catch (err) {
+    console.error("Detail fetch error:", err);
+    setDetailStatus("Network error. Check console.", "error");
+  }
+}
+
+async function sendMessage() {
+  const { ticketId, userId } = getQueryParams();
+  const content = (messageInput?.value || "").trim();
+
+  if (!content) {
+    setDetailStatus("Type a message first.", "error");
+    return;
+  }
+  if (content.length > MAX_MESSAGE_LENGTH) {
+    setDetailStatus(`Too long. Max ${MAX_MESSAGE_LENGTH} chars.`, "error");
+    return;
+  }
+
+  setDetailStatus("Sending...", "info");
+
+  try {
+    const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId
+      },
+      body: JSON.stringify({ messageText: content })
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error("Send message error:", resp.status, text);
+      setDetailStatus(`Send failed (${resp.status}).`, "error");
+      return;
+    }
+
+    if (messageInput) messageInput.value = "";
+    setDetailStatus("Sent.", "success");
+    await loadTicketAndMessages();
+  } catch (err) {
+    console.error("Send message network error:", err);
+    setDetailStatus("Network error while sending.", "error");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (messageInput) messageInput.maxLength = MAX_MESSAGE_LENGTH;
+  loadTicketAndMessages();
+});
+
+if (sendMessageBtn) {
+  sendMessageBtn.addEventListener("click", sendMessage);
 }
