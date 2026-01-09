@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Ticket Queue</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Ticket Queue</h1>
+      </div>
+      <div class="nav">
+        <a class="pill" href="./index.html">Home</a>
+        <a class="pill active" href="./tickets.html">Ticket Queue</a>
+        <a class="pill" href="../app/tickets.html">Customer Tickets</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Filters</h2>
+        <div class="grid" style="gap:10px">
+          <div>
+            <label class="sub">Search</label>
+            <input id="search" class="input" placeholder="title, ticketId, status, priority..." />
+          </div>
+          <div>
+            <label class="sub">Status</label>
+            <select id="status" class="input">
+              <option value="">All</option>
+              <option value="OPEN">OPEN</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="RESOLVED">RESOLVED</option>
+            </select>
+          </div>
+          <div class="btnrow">
+            <button id="refresh" class="btn">Refresh</button>
+            <a class="btn ghost" href="./index.html">Back</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Mode</h2>
+        <p class="sub">
+          This page calls <code style="color:var(--lime)">GET /admin/tickets</code>.
+          If you haven’t deployed the admin lambda/routes yet, refresh will fail — that’s expected.
+        </p>
+        <div class="kpi">
+          <span class="sub">Loaded</span>
+          <b id="count">0</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Queue</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Assigned</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="5" class="sub">No data yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { escapeHtml, formatIso, toast } from "../assets/ui.js";
+    import { getDevIdentity, tryAdmin, adminListAllTickets } from "../assets/api.js";
+
+    const rows = document.getElementById("rows");
+    const count = document.getElementById("count");
+    const search = document.getElementById("search");
+    const status = document.getElementById("status");
+    const refresh = document.getElementById("refresh");
+
+    let all = [];
+
+    function render() {
+      const q = (search.value || "").toLowerCase().trim();
+      const s = status.value;
+
+      const filtered = all.filter(t => {
+        const hay = [
+          t.ticketId, t.title, t.status, t.priority, t.assignedTechId, t.assignedGroupId
+        ].filter(Boolean).join(" ").toLowerCase();
+
+        const okQ = !q || hay.includes(q);
+        const okS = !s || (String(t.status || "").toUpperCase() === s);
+        return okQ && okS;
+      });
+
+      count.textContent = String(filtered.length);
+
+      if (!filtered.length) {
+        rows.innerHTML = `<tr><td colspan="5" class="sub">No tickets match your filters.</td></tr>`;
+        return;
+      }
+
+      rows.innerHTML = filtered.map(t => {
+        const id = escapeHtml(t.ticketId || "—");
+        const st = escapeHtml(t.status || "—");
+        const pr = escapeHtml(t.priority || "—");
+        const asg = escapeHtml(t.assignedTechId || t.assignedGroupId || "—");
+        const upd = escapeHtml(formatIso(t.updatedAt || t.createdAt));
+        return `
+          <tr>
+            <td><a href="./ticket-detail.html?ticketId=${encodeURIComponent(t.ticketId)}">${id}</a><br><span class="sub">${escapeHtml(t.title || "")}</span></td>
+            <td>${st}</td>
+            <td>${pr}</td>
+            <td>${asg}</td>
+            <td>${upd}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function load() {
+      rows.innerHTML = `<tr><td colspan="5" class="sub">Loading…</td></tr>`;
+      const { userId } = getDevIdentity("admin");
+
+      try {
+        const data = await tryAdmin(
+          () => adminListAllTickets({ adminUserId: userId }),
+          "Admin routes not deployed yet. Deploy /admin/tickets to enable the queue."
+        );
+
+        // Expected: { tickets: [...] } or just [...]
+        all = Array.isArray(data) ? data : (data.tickets || []);
+        toast(`Loaded ${all.length} tickets`, "info");
+      } catch (e) {
+        all = [];
+        rows.innerHTML = `<tr><td colspan="5" class="sub">Failed to load admin queue: ${escapeHtml(e.message)}</td></tr>`;
+        count.textContent = "0";
+        return;
+      }
+
+      render();
+    }
+
+    refresh.addEventListener("click", load);
+    search.addEventListener("input", render);
+    status.addEventListener("change", render);
+
+    load();
+  </script>
+</body>
+</html>
