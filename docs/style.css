@@ -1,232 +1,486 @@
-// ==============================================
-// The Winning Team — Ticket Detail Frontend
-// ==============================================
+/* =========================================================
+   The Winning Team — Tech Theme (Gray/Black/White + Lime)
+   Clean + terminal-ish + structured layouts
+   ========================================================= */
 
-const API_BASE_URL = "https://oeed3y9bkb.execute-api.us-east-1.amazonaws.com";
-const MAX_MESSAGE_LENGTH = 1200;
+:root{
+  --bg: #0b0f14;
+  --panel: #111823;
+  --panel-2: #0f151e;
+  --border: rgba(255,255,255,0.10);
 
-// DOM
-const ticketMeta = document.getElementById("ticketMeta");
-const messagesList = document.getElementById("messagesList");
-const messageInput = document.getElementById("messageInput");
-const sendMessageBtn = document.getElementById("sendMessageBtn");
-const detailStatus = document.getElementById("detailStatus");
+  --text: #e8eef5;
+  --muted: rgba(232,238,245,0.72);
 
-function setDetailStatus(message, type = "info") {
-  if (!detailStatus) return;
-  detailStatus.textContent = message || "";
-  detailStatus.className = "status " + (type === "success" ? "ok" : type === "error" ? "err" : "");
+  --lime: #a3ff12;
+  --lime-soft: rgba(163,255,18,0.14);
+
+  --danger: #ff6b6b;
+  --warn: #ffd166;
+
+  --shadow: 0 18px 55px rgba(0,0,0,0.55);
+  --radius: 10px;
+
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-function getQueryParams() {
-  const params = new URLSearchParams(window.location.search);
-  return {
-    ticketId: params.get("ticketId"),
-    userId: params.get("userId") || getActiveUser("customer_ashley")
-  };
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+
+body{
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(163,255,18,0.10), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(163,255,18,0.06), transparent 55%),
+    linear-gradient(180deg, #05070a 0%, var(--bg) 45%, #05070a 100%);
+  font-family:var(--sans);
 }
 
-function emergencyLabel(ticket) {
-  const flag = ticket.isEmergency || "";
-  const bool = ticket.isEmergencyBool;
-  return flag || (bool ? "EMERGENCY" : "NORMAL");
+/* ---------- Layout shell ---------- */
+.shell{
+  max-width:1200px;
+  margin:0 auto;
+  padding:26px 18px 40px;
 }
 
-function renderTicketMeta(ticket) {
-  if (!ticketMeta) return;
-
-  if (!ticket) {
-    ticketMeta.innerHTML = `<div class="k">Ticket not found.</div>`;
-    return;
-  }
-
-  ticketMeta.innerHTML = `
-    <div class="meta-grid">
-      <div>
-        <div class="k">TITLE</div>
-        <div class="v">${ticket.title || "Untitled Ticket"}</div>
-      </div>
-      <div>
-        <div class="k">TICKET ID</div>
-        <div class="v">${ticket.ticketId || ""}</div>
-      </div>
-
-      <div>
-        <div class="k">STATUS</div>
-        <div class="v">${ticket.status || ""}</div>
-      </div>
-      <div>
-        <div class="k">PRIORITY</div>
-        <div class="v">${ticket.priority || ""}</div>
-      </div>
-
-      <div>
-        <div class="k">EMERGENCY</div>
-        <div class="v">${emergencyLabel(ticket)}</div>
-      </div>
-      <div>
-        <div class="k">CREATED BY</div>
-        <div class="v">${ticket.createdByUserId || ""}</div>
-      </div>
-
-      <div>
-        <div class="k">ASSIGNED TECH</div>
-        <div class="v">${ticket.assignedTechId || "—"}</div>
-      </div>
-      <div>
-        <div class="k">ASSIGNED GROUP</div>
-        <div class="v">${ticket.assignedGroupId || "—"}</div>
-      </div>
-
-      <div>
-        <div class="k">CREATED</div>
-        <div class="v">${formatDate(ticket.createdAt)}</div>
-      </div>
-      <div>
-        <div class="k">UPDATED</div>
-        <div class="v">${formatDate(ticket.updatedAt)}</div>
-      </div>
-
-      <div style="grid-column: 1 / -1;">
-        <div class="k">DESCRIPTION</div>
-        <div class="v">${ticket.description || ""}</div>
-      </div>
-    </div>
-  `;
+.card{
+  background: linear-gradient(180deg, rgba(17,24,35,0.92), rgba(15,21,30,0.92));
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:var(--radius);
 }
 
-function renderMessages(messages) {
-  if (!messagesList) return;
+.card-pad{ padding:18px; }
 
-  messagesList.innerHTML = "";
-
-  if (!messages || messages.length === 0) {
-    messagesList.innerHTML = `<div class="k">No messages yet.</div>`;
-    return;
-  }
-
-  messages.forEach((m) => {
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    const role = (m.senderRole || "USER").toUpperCase();
-    const sender = m.senderId || "";
-    const time = formatDate(m.timestamp);
-
-    div.innerHTML = `
-      <div class="msg-head">
-        <span class="badge">${role}</span>
-        <span>${sender}</span>
-        <span style="margin-left:auto;">${time}</span>
-      </div>
-      <div class="msg-body">${(m.messageText || "").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
-    `;
-
-    messagesList.appendChild(div);
-  });
+/* ---------- Top header ---------- */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  padding:16px 18px;
 }
 
-async function loadTicketAndMessages() {
-  const { ticketId, userId } = getQueryParams();
-
-  if (!ticketId) {
-    if (ticketMeta) ticketMeta.innerHTML = `<div class="k">No ticketId provided in URL.</div>`;
-    return;
-  }
-
-  setActiveUser(userId);
-  setDetailStatus("Loading ticket + messages...", "info");
-
-  try {
-    // Ticket
-    const ticketResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
-      method: "GET",
-      headers: { "x-user-id": userId }
-    });
-
-    if (!ticketResp.ok) {
-      const text = await ticketResp.text();
-      console.error("Ticket detail error:", ticketResp.status, text);
-      setDetailStatus(`Error loading ticket (${ticketResp.status}).`, "error");
-      return;
-    }
-
-    const ticket = await ticketResp.json();
-    renderTicketMeta(ticket);
-
-    // Messages
-    const msgResp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
-      method: "GET",
-      headers: { "x-user-id": userId }
-    });
-
-    if (!msgResp.ok) {
-      const text = await msgResp.text();
-      console.error("Messages error:", msgResp.status, text);
-      setDetailStatus(
-        `Ticket loaded, but messages failed (${msgResp.status}). Usually CORS if PowerShell works.`,
-        "error"
-      );
-      return;
-    }
-
-    const msgData = await msgResp.json();
-    const items = Array.isArray(msgData.messages) ? msgData.messages : [];
-    renderMessages(items);
-
-    setDetailStatus("Loaded.", "success");
-  } catch (err) {
-    console.error("Detail fetch error:", err);
-    setDetailStatus("Network error. Check console.", "error");
-  }
+.brand{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width: 240px;
 }
 
-async function sendMessage() {
-  const { ticketId, userId } = getQueryParams();
-  const content = (messageInput?.value || "").trim();
-
-  if (!content) {
-    setDetailStatus("Type a message first.", "error");
-    return;
-  }
-  if (content.length > MAX_MESSAGE_LENGTH) {
-    setDetailStatus(`Too long. Max ${MAX_MESSAGE_LENGTH} chars.`, "error");
-    return;
-  }
-
-  setDetailStatus("Sending...", "info");
-
-  try {
-    const resp = await fetch(`${API_BASE_URL}/tickets/${ticketId}/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": userId
-      },
-      body: JSON.stringify({ messageText: content })
-    });
-
-    if (!resp.ok) {
-      const text = await resp.text();
-      console.error("Send message error:", resp.status, text);
-      setDetailStatus(`Send failed (${resp.status}).`, "error");
-      return;
-    }
-
-    if (messageInput) messageInput.value = "";
-    setDetailStatus("Sent.", "success");
-    await loadTicketAndMessages();
-  } catch (err) {
-    console.error("Send message network error:", err);
-    setDetailStatus("Network error while sending.", "error");
-  }
+.brand h1{
+  margin:0;
+  font-size:16px;
+  font-family:var(--mono);
+  letter-spacing:0.06em;
+  text-transform:uppercase;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (messageInput) messageInput.maxLength = MAX_MESSAGE_LENGTH;
-  loadTicketAndMessages();
-});
+.brand .sub{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
 
-if (sendMessageBtn) {
-  sendMessageBtn.addEventListener("click", sendMessage);
+.nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+.nav a{
+  text-decoration:none;
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:12px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background: rgba(0,0,0,0.18);
+}
+
+.nav a:hover{
+  border-color: rgba(163,255,18,0.55);
+  box-shadow: 0 0 0 3px rgba(163,255,18,0.08);
+}
+
+.nav a.active{
+  border-color: rgba(163,255,18,0.85);
+  background: linear-gradient(180deg, rgba(163,255,18,0.15), rgba(0,0,0,0.12));
+}
+
+/* ---------- Sections ---------- */
+.section{ margin-top:16px; }
+
+.section h2, .section h3{
+  margin:0 0 8px 0;
+  font-family:var(--mono);
+  letter-spacing:0.03em;
+}
+
+.section p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.6;
+  font-size:14px;
+}
+
+.hr{
+  height:1px;
+  background: rgba(255,255,255,0.08);
+  margin:14px 0;
+}
+
+/* ---------- Grids ---------- */
+.grid-2{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:14px;
+  margin-top:14px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:14px;
+  margin-top:14px;
+}
+
+@media (max-width: 980px){
+  .grid-3{ grid-template-columns: 1fr; }
+}
+@media (max-width: 900px){
+  .grid-2{ grid-template-columns: 1fr; }
+}
+
+/* ---------- Buttons ---------- */
+.actions{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:0.02em;
+
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid rgba(163,255,18,0.65);
+  background: rgba(163,255,18,0.10);
+  color:var(--text);
+  cursor:pointer;
+  text-decoration:none;
+  user-select:none;
+}
+
+.btn:hover{
+  background: rgba(163,255,18,0.16);
+  box-shadow: 0 0 0 3px rgba(163,255,18,0.10);
+}
+
+.btn-solid{
+  background: rgba(163,255,18,0.20);
+}
+
+.btn-solid:hover{
+  background: rgba(163,255,18,0.26);
+}
+
+.btn-ghost{
+  border-color: var(--border);
+  background: rgba(0,0,0,0.18);
+}
+.btn-ghost:hover{
+  border-color: rgba(163,255,18,0.55);
+  background: rgba(0,0,0,0.22);
+}
+
+.btn-danger{
+  border-color: rgba(255,107,107,0.65);
+  background: rgba(255,107,107,0.10);
+}
+.btn-danger:hover{
+  background: rgba(255,107,107,0.16);
+  box-shadow: 0 0 0 3px rgba(255,107,107,0.10);
+}
+
+/* ---------- Inputs ---------- */
+label{
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+select, input[type="text"], input[type="url"], textarea{
+  background: rgba(0,0,0,0.20);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+input[type="text"], input[type="url"]{ width:100%; }
+
+select:focus, input:focus, textarea:focus{
+  outline:none;
+  border-color: rgba(163,255,18,0.70);
+  box-shadow: 0 0 0 3px rgba(163,255,18,0.10);
+}
+
+textarea{
+  width:100%;
+  min-height:110px;
+  resize:vertical;
+  padding:12px;
+  line-height:1.6;
+}
+
+/* ---------- Status messages ---------- */
+.status{
+  margin-top:10px;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+}
+.status.ok{ color: rgba(163,255,18,0.95); }
+.status.err{ color: var(--danger); }
+.status.warn{ color: var(--warn); }
+
+/* ---------- Tables ---------- */
+.tablewrap{
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:var(--mono);
+  font-size:12px;
+}
+
+thead{ background: rgba(163,255,18,0.10); }
+
+th, td{
+  padding:12px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  text-align:left;
+  vertical-align:top;
+}
+
+tbody tr{ background: rgba(0,0,0,0.18); }
+tbody tr:hover{
+  background: rgba(163,255,18,0.06);
+  cursor:pointer;
+}
+
+.mono{ font-family: var(--mono); }
+
+.idcell{
+  max-width: 260px;
+  word-break: break-word;
+}
+
+/* ---------- “Dev portal” / toolbars ---------- */
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:flex-end;
+  margin-top:12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width: 220px;
+}
+
+.field.small{ min-width: 160px; }
+.field.grow{ flex:1; min-width: 260px; }
+
+@media (max-width: 680px){
+  .field, .field.small, .field.grow{ min-width: 100%; }
+}
+
+/* ---------- Panels ---------- */
+.panel{
+  margin-top:12px;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background: rgba(0,0,0,0.18);
+}
+
+.panel h3{
+  margin:0 0 8px 0;
+  font-family: var(--mono);
+}
+
+.k{ color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.v{ margin-top: 4px; font-family: var(--mono); font-size: 12px; }
+
+/* ---------- Ticket meta ---------- */
+.meta{ margin-top:12px; }
+.meta-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+@media (max-width: 900px){
+  .meta-grid{ grid-template-columns: 1fr; }
+}
+.meta-wide{ grid-column: 1 / -1; }
+
+.value-wrap{ word-break: break-word; }
+
+/* ---------- Messages ---------- */
+.messages{
+  margin-top:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius: var(--radius);
+  padding:12px;
+}
+
+.msg-head{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+}
+
+.badge{
+  border:1px solid rgba(163,255,18,0.55);
+  background: rgba(163,255,18,0.10);
+  color:var(--text);
+  padding:4px 8px;
+  border-radius:999px;
+  font-family:var(--mono);
+  font-size:11px;
+}
+
+.msg-body{
+  margin-top:8px;
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.6;
+  white-space:pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- Composer ---------- */
+.composer{
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  padding:12px;
+  background: rgba(0,0,0,0.18);
+}
+
+.composer-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.composer-actions{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* ---------- Showcase: “schema” blocks ---------- */
+.schema{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:14px;
+}
+@media (max-width: 980px){
+  .schema{ grid-template-columns: 1fr; }
+}
+
+.table-card{
+  padding:0;
+  overflow:hidden;
+}
+
+.table-title{
+  padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  background: rgba(163,255,18,0.08);
+  font-family: var(--mono);
+  letter-spacing: 0.03em;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+.table-title .tag{
+  font-size:11px;
+  color: var(--muted);
+}
+
+.table-body{
+  padding:12px 14px;
+}
+
+.schema-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:1px dashed rgba(255,255,255,0.08);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.schema-row:last-child{ border-bottom:none; }
+
+.key{
+  color: var(--text);
+}
+.type{
+  color: var(--muted);
+}
+
+/* ---------- Footer ---------- */
+.footer{
+  margin-top:16px;
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:12px;
+  text-align:right;
 }
