@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer App • TheWinningTeam IT Services</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Customer Product</h1>
+      </div>
+      <div class="nav">
+        <a class="pill active" href="./index.html">Home</a>
+        <a class="pill" href="./tickets.html">Tickets</a>
+        <a class="pill" href="../admin/index.html">Admin</a>
+        <a class="pill" href="../index.html">Marketing</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Welcome</h2>
+        <p class="sub">
+          This is the customer-facing experience: submit tickets, track progress, and message support.
+          Dev-mode identity is selectable so you can demo roles without real auth yet.
+        </p>
+
+        <div class="kpi" style="margin-top:10px">
+          <span class="sub">Current dev role</span>
+          <b id="roleLabel">—</b>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="sub">Switch dev role</label>
+          <select id="roleSelect" class="input" style="margin-top:6px">
+            <option value="customer">Customer</option>
+            <option value="tech">Tech</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div class="btnrow" style="margin-top:12px">
+          <a class="btn" href="./tickets.html">Open Tickets</a>
+          <a class="btn ghost" href="../admin/index.html">Go to Admin</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>What’s next</h2>
+        <p class="sub">
+          Phase 2 splits admin workflows into a separate app and separate lambda routes.
+          Then Cognito locks it down for real.
+        </p>
+        <hr />
+        <p class="sub"><b style="color:var(--lime)">DevOps flex ideas:</b></p>
+        <ul class="sub">
+          <li>CI deploy for docs/ + backend/ (GitHub Actions)</li>
+          <li>IaC for API + Dynamo (SAM or Terraform)</li>
+          <li>Observability: structured logs + X-Ray + dashboards</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getDevIdentity, setDevRole } from "../assets/api.js";
+
+    const roleLabel = document.getElementById("roleLabel");
+    const roleSelect = document.getElementById("roleSelect");
+
+    const id = getDevIdentity("customer");
+    roleLabel.textContent = `${id.role} (${id.userId})`;
+    roleSelect.value = id.role;
+
+    roleSelect.addEventListener("change", () => {
+      setDevRole(roleSelect.value);
+      const next = getDevIdentity("customer");
+      roleLabel.textContent = `${next.role} (${next.userId})`;
+    });
+  </script>
+</body>
+</html>
