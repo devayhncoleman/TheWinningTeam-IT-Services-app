@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Tickets</title>
+
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Customer • Tickets</h1>
+      </div>
+      <div class="nav">
+        <a class="pill" href="./index.html">Home</a>
+        <a class="pill active" href="./tickets.html">Tickets</a>
+        <a class="pill" href="../admin/index.html">Admin</a>
+        <a class="pill" href="../index.html">Launcher</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Create Ticket</h2>
+        <p class="sub">Dev-mode identity is pulled from localStorage (set on the Customer Home page).</p>
+
+        <div class="grid" style="gap:10px; margin-top:10px">
+          <div>
+            <label class="sub">Title</label>
+            <input id="title" class="input" placeholder="e.g., VPN not connecting" />
+          </div>
+          <div>
+            <label class="sub">Description</label>
+            <textarea id="description" class="input" placeholder="What happened? What did you try? Any error message?"></textarea>
+          </div>
+          <div>
+            <label class="sub">Priority</label>
+            <select id="priority" class="input">
+              <option value="LOW">LOW</option>
+              <option value="MEDIUM" selected>MEDIUM</option>
+              <option value="HIGH">HIGH</option>
+            </select>
+          </div>
+          <div class="btnrow">
+            <button id="submit" class="btn">Submit Ticket</button>
+            <button id="refresh" class="btn ghost">Refresh List</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Identity</h2>
+        <div class="kpi">
+          <span class="sub">Current dev identity</span>
+          <b id="whoami">—</b>
+        </div>
+        <hr />
+        <p class="sub">
+          If you haven’t set a role yet, go to <a href="./index.html">Customer Home</a> and pick one.
+        </p>
+        <p class="sub">
+          This page calls your existing backend route:
+          <code style="color:var(--lime)">GET /tickets</code> and <code style="color:var(--lime)">POST /tickets</code>.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Your Tickets</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="4" class="sub">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { escapeHtml, formatIso, toast } from "../assets/ui.js";
+    import { getDevIdentity, customerListTickets, customerCreateTicket } from "../assets/api.js";
+
+    const whoami = document.getElementById("whoami");
+    const rows = document.getElementById("rows");
+
+    const titleEl = document.getElementById("title");
+    const descEl = document.getElementById("description");
+    const priEl = document.getElementById("priority");
+
+    const submitBtn = document.getElementById("submit");
+    const refreshBtn = document.getElementById("refresh");
+
+    function render(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        rows.innerHTML = `<tr><td colspan="4" class="sub">No tickets yet.</td></tr>`;
+        return;
+      }
+
+      rows.inne
