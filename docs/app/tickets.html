@@ -134,8 +134,8 @@
 
       try {
         const data = await customerListTickets({ userId: id.userId });
-        const list = Array.isArray(data) ? data : (data.tickets || []);
-        render(list);
+       const list = await customerListTickets({ userId: id.userId });
+render(list);
       } catch (e) {
         rows.innerHTML = `<tr><td colspan="4" class="sub">Failed to load: ${escapeHtml(e.message)}</td></tr>`;
         toast(e.message, "error");
