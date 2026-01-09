@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin • Ticket Detail</title>
+
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Admin / Tech • Ticket Detail</h1>
+      </div>
+      <div class="nav">
+        <a class="pill" href="./index.html">Home</a>
+        <a class="pill" href="./tickets.html">Queue</a>
+        <a class="pill active" href="./ticket-detail.html">Detail</a>
+        <a class="pill" href="../app/tickets.html">Customer Tickets</a>
+        <a class="pill" href="../index.html">Launcher</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Ticket</h2>
+        <p class="sub" id="whoami">—</p>
+        <hr />
+        <div id="meta" class="sub">Loading…</div>
+      </div>
+
+      <div class="card">
+        <h2>Triage Controls</h2>
+        <p class="sub">
+          This console uses your current backend routes for now:
+          <code style="color:var(--lime)">PATCH /tickets/{ticketId}</code>.
+          Once your admin lambda exists, we’ll switch to <code style="color:var(--lime)">/admin/tickets/{ticketId}</code>.
+        </p>
+
+        <div class="grid" style="gap:10px; margin-top:10px">
+          <div class="grid two">
+            <div>
+              <label class="sub">Status</label>
+              <select id="status" class="input">
+                <option value="">(no change)</option>
+                <option value="OPEN">OPEN</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="RESOLVED">RESOLVED</option>
+              </select>
+            </div>
+            <div>
+              <label class="sub">Priority</label>
+              <select id="priority" class="input">
+                <option value="">(no change)</option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div>
+              <label class="sub">Assign Tech ID</label>
+              <input id="assignedTechId" class="input" placeholder="e.g., tech_mike" />
+            </div>
+            <div>
+              <label class="sub">Assign Group ID</label>
+              <input id="assignedGroupId" class="input" placeholder="e.g., helpdesk" />
+            </div>
+          </div>
+
+          <div class="btnrow">
+            <button id="apply" class="btn">Apply Update</button>
+            <button id="reload" class="btn ghost">Reload</button>
+          </div>
+
+          <div class="sub" id="triageStatus"></div>
+        </div>
+
+        <hr />
+
+        <h2>Post Message</h2>
+        <div class="grid" style="gap:10px; margin-top:10px">
+          <div>
+            <label class="sub">Message</label>
+            <textarea id="message" class="input" placeholder="Reply as Admin/Tech…"></textarea>
+            <div class="sub" id="charCount" style="margin-top:6px;">0 / 1200</div>
+          </div>
+          <div class="btnrow">
+            <button id="send" class="btn">Send Message</button>
+          </div>
+          <div class="sub" id="msgStatus"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Conversation</h2>
+      <div id="messages" class="grid" style="gap:10px">
+        <div class="sub">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { escapeHtml, formatIso, toast, qs } from "../assets/ui.js";
+    import { getDevIdentity, customerGetTicket, customerPatchTicket } from "../assets/api.js";
+
+    const MAX = 1200;
+
+    const whoamiEl = qs("#whoami");
+    const metaEl = qs("#meta");
+    const messagesEl = qs("#messages");
+
+    const statusSel = qs("#status");
+    const prioritySel = qs("#priority");
+    const techInput = qs("#assignedTechId");
+    const groupInput = qs("#assignedGroupId");
+
+    const applyBtn = qs("#apply");
+    const reloadBtn = qs("#reload");
+    const triageStatus = qs("#triageStatus");
+
+    const msgInput = qs("#message");
+    const charCount = qs("#charCount");
+    const sendBtn = qs("#send");
+    const msgStatus = qs("#msgStatus");
+
+    function setLine(el, text, type="info") {
+      el.textContent = text || "";
+      el.style.color =
+        type === "error" ? "rgba(255,78,78,.95)" :
+        type === "success" ? "rgba(124,255,79,.95)" :
+        type === "warn" ? "rgba(255,205,78,.95)" :
+        "var(--muted)";
+    }
+
+    function getTicketId() {
+      const p = new URLSearchParams(window.location.search);
+      return p.get("ticketId");
+    }
+
+    function renderMeta(t) {
+      const id = escapeHtml(t.ticketId || "—");
+      const title = escapeHtml(t.title || "Untitled");
+      const desc = escapeHtml(t.description || "");
+      const st = escapeHtml(t.status || "OPEN");
+      const pr = escapeHtml(t.priority || "—");
+      const created = escapeHtml(formatIso(t.createdAt));
+      const updated = escapeHtml(formatIso(t.updatedAt || t.createdAt));
+      const createdBy = escapeHtml(t.createdByUserId || t.userId || "—");
+      const tech = escapeHtml(t.assignedTechId || "—");
+      const group = escapeHtml(t.assignedGroupId || "—");
+
+      metaEl.innerHTML = `
+        <div class="grid" style="gap:10px">
+          <div class="kpi"><span class="sub">Title</span><b>${title}</b></div>
+          <div class="kpi"><span class="sub">Ticket ID</span><b style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">${id}</b></div>
+
+          <div class="grid two">
+            <div class="kpi"><span class="sub">Status</span><b>${st}</b></div>
+            <div class="kpi"><span class="sub">Priority</span><b>${pr}</b></div>
+          </div>
+
+          <div class="grid two">
+            <div class="kpi"><span class="sub">Assigned Tech</span><b>${tech}</b></div>
+            <div class="kpi"><span class="sub">Assigned Group</span><b>${group}</b></div>
+          </div>
+
+          <div class="grid two">
+            <div class="kpi"><span class="sub">Created</span><b>${created}</b></div>
+            <div class="kpi"><span class="sub">Updated</span><b>${updated}</b></div>
+          </div>
+
+          <div class="card" style="padding:12px; background: rgba(12,13,15,.35)">
+            <div class="sub" style="margin-bottom:6px">Description</div>
+            <div style="white-space:pre-wrap">${desc}</div>
+            <div class="sub" style="margin-top:10px">Created by: ${createdBy}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMessages(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        messagesEl.innerHTML = `<div class="sub">No messages yet.</div>`;
+        return;
+      }
+
+      messagesEl.innerHTML = list.map(m => {
+        const role = escapeHtml((m.senderRole || "USER").toUpperCase());
+        const sender = escapeHtml(m.senderId || "—");
+        const when = escapeHtml(formatIso(m.timestamp));
+        const text = escapeHtml(m.messageText || "");
+
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex; gap:10px; align-items:center">
+              <span class="pill" style="border-color: rgba(124,255,79,.35)">${role}</span>
+              <span class="sub" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace">${sender}</span>
+              <span class="sub" style="margin-left:auto">${when}</span>
+            </div>
+            <div style="margin-top:10px; white-space:pre-wrap">${text}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function fetchMessages({ userId, ticketId }) {
+      const base = window.APP_CONFIG.API_BASE_URL;
+      const res = await fetch(`${base}/tickets/${encodeURIComponent(ticketId)}/messages`, {
+        method: "GET",
+        headers: { "x-user-id": userId }
+      });
+
+      const text = await res.text();
+      let data;
+      try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+
+      if (!res.ok) throw new Error(data?.message || `Messages failed (${res.status})`);
+      return Array.isArray(data.messages) ? data.messages : (Array.isArray(data) ? data : []);
+    }
+
+    async function postMessage({ userId, ticketId, messageText }) {
+      const base = window.APP_CONFIG.API_BASE_URL;
+      const res = await fetch(`${base}/tickets/${encodeURIComponent(ticketId)}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": userId
+        },
+        body: JSON.stringify({ messageText })
+      });
+
+      const text = await res.text();
+      let data;
+      try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+
+      if (!res.ok) throw new Error(data?.message || `Send failed (${res.status})`);
+      return data;
+    }
+
+    async function loadAll() {
+      const ticketId = getTicketId();
+      if (!ticketId) {
+        metaEl.innerHTML = `<div class="sub">Missing ticketId in URL.</div>`;
+        messagesEl.innerHTML = `<div class="sub">Nothing to load.</div>`;
+        return;
+      }
+
+      // Default admin console identity
+      const id = getDevIdentity("admin");
+      whoamiEl.textContent = `Console identity: ${id.role} (${id.userId}) • Ticket: ${ticketId}`;
+      setLine(triageStatus, "Loading ticket…", "info");
+      setLine(msgStatus, "", "info");
+
+      try {
+        const ticket = await customerGetTicket({ userId: id.userId, ticketId });
+        renderMeta(ticket);
+
+        // helpful: prefill current assignments so you can edit fast
+        techInput.value = ticket.assignedTechId || "";
+        groupInput.value = ticket.assignedGroupId || "";
+
+        const msgs = await fetchMessages({ userId: id.userId, ticketId });
+        renderMessages(msgs);
+
+        setLine(triageStatus, "Loaded.", "success");
+      } catch (e) {
+        setLine(triageStatus, e.message, "error");
+        toast(e.message, "error");
+        metaEl.innerHTML = `<div class="sub">Failed to load ticket.</div>`;
+        messagesEl.innerHTML = `<div class="sub">Failed to load messages.</div>`;
+      }
+    }
+
+    function updateCount() {
+      const n = (msgInput.value || "").length;
+      charCount.textContent = `${n} / ${MAX}`;
+    }
+
+    msgInput.maxLength = MAX;
+    msgInput.addEventListener("input", updateCount);
+    updateCount();
+
+    reloadBtn.addEventListener("click", loadAll);
+
+    applyBtn.addEventListener("click", async () => {
+      const ticketId = getTicketId();
+      const id = getDevIdentity("admin");
+
+      if (!ticketId) return toast("Missing ticketId.", "warn");
+
+      const patch = {};
+      if (statusSel.value) patch.status = statusSel.value;
+      if (prioritySel.value) patch.priority = prioritySel.value;
+
+      const tech = (techInput.value || "").trim();
+      const grp = (groupInput.value || "").trim();
+      if (tech) patch.assignedTechId = tech;
+      if (grp) patch.assignedGroupId = grp;
+
+      if (Object.keys(patch).length === 0) {
+        setLine(triageStatus, "No changes selected.", "warn");
+        return;
+      }
+
+      applyBtn.disabled = true;
+      applyBtn.textContent = "Applying…";
+      setLine(triageStatus, "Applying update…", "info");
+
+      try {
+        await customerPatchTicket({ userId: id.userId, ticketId, patch });
+        toast("Ticket updated.", "info");
+        setLine(triageStatus, "Updated.", "success");
+
+        // reset dropdowns to no-change after apply
+        statusSel.value = "";
+        prioritySel.value = "";
+
+        await loadAll();
+      } catch (e) {
+        setLine(triageStatus, e.message, "error");
+        toast(e.message, "error");
+      } finally {
+        applyBtn.disabled = false;
+        applyBtn.textContent = "Apply Update";
+      }
+    });
+
+    sendBtn.addEventListener("click", async () => {
+      const ticketId = getTicketId();
+      const id = getDevIdentity("admin");
+      const content = (msgInput.value || "").trim();
+
+      if (!ticketId) return toast("Missing ticketId.", "warn");
+      if (!content) return toast("Type a message first.", "warn");
+      if (content.length > MAX) return toast(`Too long. Max ${MAX}.`, "warn");
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending…";
+      setLine(msgStatus, "Sending…", "info");
+
+      try {
+        await postMessage({ userId: id.userId, ticketId, messageText: content });
+        msgInput.value = "";
+        updateCount();
+        toast("Message sent.", "info");
+        setLine(msgStatus, "Sent.", "success");
+        await loadAll();
+      } catch (e) {
+        setLine(msgStatus, e.message, "error");
+        toast(e.message, "error");
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send Message";
+      }
+    });
+
+    loadAll();
+  </script>
+</body>
+</html>
