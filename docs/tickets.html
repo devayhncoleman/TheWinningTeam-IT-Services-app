@@ -2,89 +2,192 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>The Winning Team — Ticket Dashboard</title>
+  <title>The Winning Team — Ticket App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css?v=9" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
-<body class="theme-classic">
-  <div class="ticket-shell">
+<body>
+  <div class="shell">
 
-    <header class="ticket-header">
-      <div class="ticket-title-block">
-        <h1 class="ticket-title">The Winning Team — Ticketing System</h1>
-
-        <nav class="top-nav">
-          <a href="index.html" class="nav-pill">Home</a>
-          <a href="Showcase.html" class="nav-pill">Showcase</a>
-          <a href="tickets.html" class="nav-pill nav-pill--active">Ticket App</a>
-        </nav>
-
-        <p class="mini">Old-school tech UI • Live AWS backend • Dev “Act As” mode</p>
+    <div class="card topbar">
+      <div class="brand">
+        <h1>The Winning Team — Ticket App</h1>
+        <p class="sub">Live AWS backend via API Gateway + Lambda + DynamoDB</p>
       </div>
 
-      <div class="ticket-header-actions">
-        <button id="toggleNightShift" type="button">Lime Mode</button>
-      </div>
-    </header>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="Showcase.html">Showcase</a>
+        <a class="active" href="tickets.html">Live App</a>
+      </nav>
+    </div>
 
-    <main class="ticket-main">
+    <div class="card card-pad section">
+      <h2>Customer Ticket Dashboard</h2>
+      <p>
+        Dev mode uses <span class="mono">x-user-id</span> header.
+        Pick a user, load tickets, click a row to open ticket detail.
+      </p>
 
-      <section class="section">
-        <h2>Customer Ticket Dashboard</h2>
-        <p class="small-note">
-          Loads tickets from your AWS API Gateway + Lambda + DynamoDB backend.
-          If PowerShell works but this page doesn’t, it’s usually a browser console error or cached JS.
-        </p>
-      </section>
-
-      <section class="section">
-        <h3>Dev Portal — Act As</h3>
-        <p class="small-note">
-          Uses <code>x-user-id</code> to simulate different roles until Cognito auth is added.
-        </p>
-
-        <div class="user-selector">
-          <label for="userSelect">Choose user:</label>
+      <div class="toolbar">
+        <div class="field small">
+          <label for="userSelect">Act as</label>
           <select id="userSelect">
-            <option value="customer_ashley">Customer — Ashley</option>
-            <option value="tech_mike">Tech — Mike</option>
-            <option value="admin_jordan">Admin — Jordan</option>
+            <option value="customer_ashley">customer_ashley (Customer)</option>
+            <option value="tech_mike">tech_mike (Tech)</option>
+            <option value="admin_jordan">admin_jordan (Admin)</option>
           </select>
-
-          <button id="loadTicketsBtn" class="primary-cta" type="button">Load Tickets</button>
         </div>
 
-        <div id="statusMessage" class="status-message"></div>
-      </section>
-
-      <section class="section">
-        <h3>Tickets</h3>
-        <div class="table-wrapper">
-          <table id="ticketsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Priority</th>
-                <th>Emergency</th>
-                <th>Created</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <div class="field small">
+          <label>&nbsp;</label>
+          <button id="loadTicketsBtn" class="btn btn-solid" type="button">Load Tickets</button>
         </div>
-      </section>
 
-    </main>
+        <div class="field grow">
+          <label>Role</label>
+          <div id="roleBadge" class="k">—</div>
+        </div>
+      </div>
 
-    <footer class="site-footer">
-      <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
-    </footer>
+      <div id="statusMessage" class="status"></div>
+
+      <div class="tablewrap">
+        <table id="ticketsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Emergency</th>
+              <th>Created</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- tickets.js renders here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2 section">
+      <!-- CREATE TICKET (Issue submission / test generator) -->
+      <div class="card card-pad">
+        <h3>Create Ticket</h3>
+        <p>Use this to submit issues and generate test tickets on-demand.</p>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="field grow">
+              <label for="newTitle">Title</label>
+              <input id="newTitle" type="text" placeholder="e.g., Laptop freezes on wake" />
+            </div>
+            <div class="field small">
+              <label for="newPriority">Priority</label>
+              <select id="newPriority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+            <div class="field small">
+              <label for="newEmergency">Emergency</label>
+              <select id="newEmergency">
+                <option value="NORMAL" selected>NORMAL</option>
+                <option value="EMERGENCY">EMERGENCY</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field grow">
+              <label for="newDesc">Description</label>
+              <input id="newDesc" type="text" placeholder="Short description (what’s happening, when, impact)" />
+            </div>
+            <div class="field small">
+              <label>&nbsp;</label>
+              <button id="createTicketBtn" class="btn btn-solid" type="button">Submit Ticket</button>
+            </div>
+          </div>
+
+          <div id="createStatus" class="status"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN / TECH UPDATE PANEL -->
+      <div class="card card-pad">
+        <h3>Admin / Tech Controls</h3>
+        <p>Assign tech/group and update ticket fields. (Visible when acting as Tech/Admin.)</p>
+
+        <div class="panel" id="adminPanel">
+          <div class="toolbar">
+            <div class="field grow">
+              <label for="adminTicketId">Selected Ticket ID</label>
+              <input id="adminTicketId" type="text" placeholder="Click a ticket row to auto-fill" />
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field small">
+              <label for="adminStatus">Status</label>
+              <select id="adminStatus">
+                <option value="">(no change)</option>
+                <option value="OPEN">OPEN</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="RESOLVED">RESOLVED</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label for="adminPriority">Priority</label>
+              <select id="adminPriority">
+                <option value="">(no change)</option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label for="adminTech">Assign Tech</label>
+              <select id="adminTech">
+                <option value="">(no change)</option>
+                <option value="tech_mike">tech_mike</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label for="adminGroup">Assign Group</label>
+              <select id="adminGroup">
+                <option value="">(no change)</option>
+                <option value="group_helpdesk">group_helpdesk</option>
+                <option value="group_noc">group_noc</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label>&nbsp;</label>
+              <button id="adminUpdateBtn" class="btn btn-solid" type="button">Apply Update</button>
+            </div>
+          </div>
+
+          <div id="adminStatusMsg" class="status"></div>
+          <p class="k" style="margin-top:10px;">
+            Note: This panel assumes your backend PATCH supports these fields. If one field fails, check Lambda logs for validation rules.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Powered by AWS • API Gateway • Lambda • DynamoDB</div>
+    </div>
+
   </div>
 
-  <script src="script.js?v=9"></script>
-  <script src="tickets.js?v=9"></script>
+  <script src="script.js?v=2"></script>
+  <script src="tickets.js?v=2"></script>
 </body>
 </html>
