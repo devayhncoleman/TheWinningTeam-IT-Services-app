@@ -3,188 +3,163 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Showcase Gallery | DeVayhn Coleman</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap"
-    rel="stylesheet"
-  >
-
-  <link rel="stylesheet" href="style.css?v=9">
+  <title>Showcase | DeVayhn Coleman</title>
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
-
 <body>
-  <div class="page-shell">
-    <div class="page-accent"></div>
+  <div class="shell">
 
-    <div class="page-main">
-
-      <!-- HEADER -->
-      <header class="gallery-header">
-        <div class="header-left">
-          <h1>Showcase Gallery</h1>
-          <p class="tagline">
-            Curated work, features, and artifacts from my journey in tech &amp; operations.
-          </p>
-        </div>
-
-        <div class="header-right">
-          <p class="mini header-note">
-            A rotating view into repos, labs, and creative work that shows how I think and build.
-          </p>
-        </div>
-      </header>
-
-      <!-- ACTION BAR -->
-      <div class="header-actions">
-        <div class="header-actions-left">
-          <a href="index.html">
-            <button type="button">Back to Home</button>
-          </a>
-        </div>
-
-        <div class="header-actions-right">
-          <button id="toggleNightShift" type="button">Night Shift Mode 🦉</button>
-
-          <button id="musicToggle" type="button">Play music 🎵</button>
-
-          <label class="vol">
-            <span>Volume</span>
-            <input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.25">
-          </label>
-
-          <audio id="bgMusic" src="assets/Chill2.mp3" preload="auto"></audio>
-          <audio id="alertSound" src="assets/shocked.mp3" preload="auto"></audio>
-        </div>
+    <div class="card topbar">
+      <div class="brand">
+        <h1>Showcase</h1>
+        <p class="sub">A “schema view” of projects, repos, and proof-of-work.</p>
       </div>
 
-      <!-- NAV -->
-      <nav>
-        <div class="nav-inner">
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="#gallery">Showcase</a></li>
-          </ul>
-        </div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="tickets.html">Live App</a>
+        <a class="active" href="Showcase.html">Showcase</a>
       </nav>
-
-      <!-- GALLERY -->
-      <section id="gallery" class="section">
-        <h2>Royal Gallery</h2>
-
-        <p class="gallery-intro mini">
-          A rotating selection of links to projects, writeups, labs, talks, and artifacts that reflect how I think, build, and operate.
-        </p>
-
-        <div class="gallery-grid">
-
-          <!-- FEATURED: Ticketing App -->
-          <article class="gallery-card">
-            <div class="gallery-frame">
-              <div class="gallery-tag">Featured Project</div>
-              <h3>The Winning Team — IT Services Ticketing Platform</h3>
-              <p>
-                A cloud-native ticketing system built on AWS (API Gateway, Lambda, DynamoDB)
-                supporting customers, technicians, and admins — including emergency workflows,
-                chat messaging, and real role-based access.
-              </p>
-            </div>
-
-            <div class="gallery-meta">
-              <span class="mini">Category: Cloud • Backend • DevOps</span>
-              <a href="tickets.html">
-                <button type="button">Open Live App</button>
-              </a>
-            </div>
-          </article>
-
-          <!-- GITHUB -->
-          <article class="gallery-card">
-            <div class="gallery-frame">
-              <div class="gallery-tag">Featured</div>
-              <h3>GitHub Portfolio Repo</h3>
-              <p>
-                The source code behind this site, including layout, styling, and interactive elements.
-              </p>
-            </div>
-
-            <div class="gallery-meta">
-              <span class="mini">Category: Infrastructure &amp; Frontend</span>
-              <a href="https://github.com/devayhncoleman/My-Folio" target="_blank" rel="noopener">
-                <button type="button">View on GitHub</button>
-              </a>
-            </div>
-          </article>
-
-          <!-- LINKEDIN -->
-          <article class="gallery-card">
-            <div class="gallery-frame">
-              <div class="gallery-tag">Professional</div>
-              <h3>LinkedIn Profile</h3>
-              <p>
-                Experience, certifications, and journey aligned with operations, NOC, and cloud-focused roles.
-              </p>
-            </div>
-
-            <div class="gallery-meta">
-              <span class="mini">Category: Professional Profile</span>
-              <a href="https://www.linkedin.com/in/devayhn-coleman-788411223/" target="_blank" rel="noopener">
-                <button type="button">Open LinkedIn</button>
-              </a>
-            </div>
-          </article>
-
-          <!-- LABS -->
-          <article class="gallery-card">
-            <div class="gallery-frame">
-              <div class="gallery-tag">Labs</div>
-              <h3>Security / NOC Lab Highlights</h3>
-              <p>
-                Reserved for a future write-up showcasing monitoring, incident handling,
-                or blue-team exercises.
-              </p>
-            </div>
-
-            <div class="gallery-meta">
-              <span class="mini">Category: Hands-on Practice</span>
-              <a href="#">
-                <button type="button">Coming Soon</button>
-              </a>
-            </div>
-          </article>
-
-          <!-- CREATIVE -->
-          <article class="gallery-card">
-            <div class="gallery-frame">
-              <div class="gallery-tag">Creative</div>
-              <h3>Personal / Creative Work</h3>
-              <p>
-                Music, writing, and visuals that show personality beyond tickets and terminals.
-              </p>
-            </div>
-
-            <div class="gallery-meta">
-              <span class="mini">Category: Creative</span>
-              <a href="#">
-                <button type="button">Add Link</button>
-              </a>
-            </div>
-          </article>
-
-        </div>
-      </section>
-
-      <!-- FOOTER -->
-      <footer class="site-footer">
-        <p>&copy; 2025 DeVayhn (Devayjah) Coleman — Showcase</p>
-      </footer>
-
     </div>
+
+    <div class="card card-pad section">
+      <h2>Portfolio Schema</h2>
+      <p>
+        Think of this page like a database browser: each block is a “table” of links.
+        Simple, obvious, and built for hiring managers who skim fast.
+      </p>
+
+      <div class="schema">
+        <!-- CAPSTONE TABLE -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>capstone_projects</span>
+            <span class="tag">AWS • API GW • Lambda • DynamoDB</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">winning_team_ticketing_app</span>
+              <span class="type">LIVE</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-solid" href="tickets.html">Open Live App</a>
+              <a class="btn btn-ghost" href="architecture.md">Architecture</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPOS TABLE -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>repos</span>
+            <span class="tag">source • docs • build</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">portfolio_site</span>
+              <span class="type">GITHUB</span>
+            </div>
+            <div class="schema-row">
+              <span class="key">capstone_app_repo</span>
+              <span class="type">GITHUB</span>
+            </div>
+            <div class="actions">
+              <a class="btn" href="https://github.com/" target="_blank" rel="noopener">View GitHub</a>
+            </div>
+            <p class="k" style="margin-top:10px;">Update these links to your real repos.</p>
+          </div>
+        </div>
+
+        <!-- PROFESSIONAL TABLE -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>profiles</span>
+            <span class="tag">resume-facing</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">linkedin</span>
+              <span class="type">PUBLIC</span>
+            </div>
+            <div class="schema-row">
+              <span class="key">certifications</span>
+              <span class="type">SEC+</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-solid" href="https://www.linkedin.com/" target="_blank" rel="noopener">Open LinkedIn</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- LABS TABLE -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>labs</span>
+            <span class="tag">ops • security • troubleshooting</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">incident_response_writeups</span>
+              <span class="type">SOON</span>
+            </div>
+            <div class="schema-row">
+              <span class="key">monitoring_dashboards</span>
+              <span class="type">SOON</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-ghost" href="tickets.html">View Live App Evidence</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARTIFACTS TABLE -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>artifacts</span>
+            <span class="tag">docs • screenshots • demos</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">architecture_diagrams</span>
+              <span class="type">MD</span>
+            </div>
+            <div class="schema-row">
+              <span class="key">api_contract_notes</span>
+              <span class="type">MD</span>
+            </div>
+            <div class="actions">
+              <a class="btn" href="architecture.md">Open Docs</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUN TABLE (WHIMSY) -->
+        <div class="card table-card">
+          <div class="table-title">
+            <span>arcade_tokens</span>
+            <span class="tag">whimsy • but still clean</span>
+          </div>
+          <div class="table-body">
+            <div class="schema-row">
+              <span class="key">build_style</span>
+              <span class="type">terminal-lime</span>
+            </div>
+            <div class="schema-row">
+              <span class="key">design_goal</span>
+              <span class="type">clarity > cute</span>
+            </div>
+            <p class="k" style="margin-top:10px;">No music, no gimmicks—just “ops-ready” presentation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>© 2026 — DeVayhn (Devayjah) Coleman</div>
+    </div>
+
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>
