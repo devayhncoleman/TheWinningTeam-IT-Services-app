@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>The Winning Team — Ticket App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
   <div class="shell">
@@ -19,6 +19,7 @@
         <a href="index.html">Home</a>
         <a href="Showcase.html">Showcase</a>
         <a class="active" href="tickets.html">Live App</a>
+        <a href="resume.html">Resume</a>
         <a href="https://docs.google.com/document/d/1hToyl2xu5BbLZD0a825eTZHSBKAo_CU5RM6nbIVrTxs/edit?usp=sharing"
            target="_blank" rel="noopener">Architecture</a>
       </nav>
@@ -73,15 +74,12 @@
               <th>Updated</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- tickets.js renders here -->
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
 
     <div class="grid-2 section">
-      <!-- CREATE TICKET -->
       <div class="card card-pad">
         <h3>Create Ticket</h3>
         <p>Use this to submit issues and generate test tickets on-demand.</p>
@@ -124,7 +122,6 @@
         </div>
       </div>
 
-      <!-- ADMIN / TECH UPDATE PANEL -->
       <div class="card card-pad">
         <h3>Admin / Tech Controls</h3>
         <p>Assign tech/group and update ticket fields. (Visible when acting as Tech/Admin.)</p>
@@ -182,9 +179,6 @@
           </div>
 
           <div id="adminStatusMsg" class="status"></div>
-          <p class="k" style="margin-top:10px;">
-            Note: This assumes your backend PATCH supports status/priority/assignedTechId/assignedGroupId.
-          </p>
         </div>
       </div>
     </div>
@@ -195,7 +189,7 @@
 
   </div>
 
-  <script src="script.js?v=3"></script>
-  <script src="tickets.js?v=3"></script>
+  <script src="script.js?v=4"></script>
+  <script src="tickets.js?v=4"></script>
 </body>
 </html>
