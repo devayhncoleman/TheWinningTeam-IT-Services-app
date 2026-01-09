@@ -107,4 +107,78 @@
         return;
       }
 
-      rows.inne
+      rows.innerHTML = list.map(t => {
+        const id = escapeHtml(t.ticketId || "—");
+        const st = escapeHtml(t.status || "OPEN");
+        const pr = escapeHtml(t.priority || "—");
+        const upd = escapeHtml(formatIso(t.updatedAt || t.createdAt));
+
+        return `
+          <tr>
+            <td>
+              <a href="./ticket-detail.html?ticketId=${encodeURIComponent(t.ticketId)}">${id}</a><br />
+              <span class="sub">${escapeHtml(t.title || "")}</span>
+            </td>
+            <td>${st}</td>
+            <td>${pr}</td>
+            <td>${upd}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function load() {
+      rows.innerHTML = `<tr><td colspan="4" class="sub">Loading…</td></tr>`;
+      const id = getDevIdentity("customer");
+      whoami.textContent = `${id.role} (${id.userId})`;
+
+      try {
+        const data = await customerListTickets({ userId: id.userId });
+        const list = Array.isArray(data) ? data : (data.tickets || []);
+        render(list);
+      } catch (e) {
+        rows.innerHTML = `<tr><td colspan="4" class="sub">Failed to load: ${escapeHtml(e.message)}</td></tr>`;
+        toast(e.message, "error");
+      }
+    }
+
+    async function noteCreate() {
+      const id = getDevIdentity("customer");
+      const title = (titleEl.value || "").trim();
+      const description = (descEl.value || "").trim();
+      const priority = (priEl.value || "MEDIUM").trim();
+
+      if (!title || !description) {
+        toast("Title and description are required.", "warn");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
+      try {
+        await customerCreateTicket({
+          userId: id.userId,
+          payload: { title, description, priority }
+        });
+
+        toast("Note received. Ticket created.", "info");
+        titleEl.value = "";
+        descEl.value = "";
+        priEl.value = "MEDIUM";
+        await load();
+      } catch (e) {
+        toast(e.message, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Ticket";
+      }
+    }
+
+    submitBtn.addEventListener("click", noteCreate);
+    refreshBtn.addEventListener("click", load);
+
+    load();
+  </script>
+</body>
+</html>
