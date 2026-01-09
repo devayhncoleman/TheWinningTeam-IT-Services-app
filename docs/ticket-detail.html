@@ -4,56 +4,65 @@
   <meta charset="UTF-8" />
   <title>The Winning Team — Ticket Detail</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css?v=9" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
-<body class="theme-classic">
-  <div class="ticket-detail-shell">
+<body>
+  <div class="shell">
 
-    <header class="ticket-header">
-      <div class="ticket-title-block">
-        <h1 class="ticket-title">Ticket Detail</h1>
-
-        <nav class="top-nav">
-          <a href="index.html" class="nav-pill">Home</a>
-          <a href="Showcase.html" class="nav-pill">Showcase</a>
-          <a href="tickets.html" class="nav-pill nav-pill--active">Ticket App</a>
-        </nav>
-
-        <p class="mini">Loads 1 ticket + message history • Posts new messages</p>
+    <div class="card topbar">
+      <div class="brand">
+        <h1>Ticket Detail</h1>
+        <p class="sub">Single ticket + message history</p>
       </div>
 
-      <div class="ticket-header-actions">
-        <button id="toggleNightShift" type="button">Lime Mode</button>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="Showcase.html">Showcase</a>
+        <a class="active" href="tickets.html">Live App</a>
+      </nav>
+    </div>
+
+    <div class="card card-pad section">
+      <h2>Ticket Overview</h2>
+      <p>Ticket fields + assignment info, then chat messages below.</p>
+
+      <div id="ticketMeta" class="meta panel">
+        <!-- ticket-detail.js renders here -->
       </div>
-    </header>
 
-    <main class="ticket-main">
+      <div class="hr"></div>
 
-      <section class="section">
-        <h2>Ticket Overview</h2>
-        <div id="ticketMeta" class="ticket-meta-card"></div>
-        <div id="detailStatus" class="status-message"></div>
-      </section>
+      <h3>Messages</h3>
 
-      <section class="section">
-        <h3>Messages</h3>
-        <div id="messagesList" class="messages-list"></div>
+      <div id="messagesList" class="messages">
+        <!-- ticket-detail.js renders here -->
+      </div>
 
-        <form class="message-composer" onsubmit="return false;">
-          <label for="messageInput" class="sr-only">Add a message</label>
-          <textarea id="messageInput" rows="4" placeholder="Type your message…"></textarea>
-          <button id="sendMessageBtn" class="primary-cta" type="button">Send Message</button>
-        </form>
-      </section>
+      <div class="composer">
+        <div class="composer-head">
+          <div>
+            <div class="k">Add a message</div>
+            <div class="k" style="margin-top:4px;">Max 1200 chars • HTML-safe</div>
+          </div>
+          <a class="btn btn-ghost" href="tickets.html">Back</a>
+        </div>
 
-    </main>
+        <textarea id="messageInput" placeholder="Type your message..." maxlength="1200"></textarea>
 
-    <footer class="site-footer">
-      <p>Built by The Winning Team — Powered by AWS (API Gateway, Lambda, DynamoDB).</p>
-    </footer>
+        <div class="composer-actions">
+          <button id="sendMessageBtn" class="btn btn-solid" type="button">Send Message</button>
+          <div id="detailStatus" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Powered by AWS • TicketMessages supports ordered chat</div>
+    </div>
+
   </div>
 
-  <script src="script.js?v=9"></script>
-  <script src="ticket-detail.js?v=9"></script>
+  <script src="script.js?v=2"></script>
+  <script src="ticket-detail.js?v=2"></script>
 </body>
 </html>
