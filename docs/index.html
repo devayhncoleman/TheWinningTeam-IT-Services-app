@@ -1,75 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeVayhn (Devayjah) Coleman | Portfolio + Capstone</title>
-  <link rel="stylesheet" href="style.css?v=4" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TheWinningTeam IT Services • Launcher</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <script src="./assets/config.js"></script>
 </head>
 <body>
-  <div class="shell">
-
-    <div class="card topbar">
+  <div class="container">
+    <div class="topbar">
       <div class="brand">
-        <h1>DeVayhn (Devayjah) Coleman</h1>
-        <p class="sub">Portfolio + Capstone — Cloud-native IT Ticketing System (AWS)</p>
+        <div class="badge"></div>
+        <h1>TheWinningTeam IT Services</h1>
       </div>
-
-      <nav class="nav">
-        <a class="active" href="index.html">Home</a>
-        <a href="tickets.html">Live App</a>
-        <a href="Showcase.html">Showcase</a>
-        <a href="resume.html">Resume</a>
-      </nav>
+      <div class="nav">
+        <a class="pill active" href="./index.html">Home</a>
+        <a class="pill" href="./app/index.html">Customer</a>
+        <a class="pill" href="./admin/index.html">Admin</a>
+      </div>
     </div>
 
-    <div class="card card-pad section">
-      <h2>Overview</h2>
-      <p>
-        This capstone is a cloud-native ticketing system powered by AWS (API Gateway, Lambda, DynamoDB).
-        The live web app supports ticket listing, ticket detail, and message chat — with a dev “Act as” selector
-        until auth is added.
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Customer Product</h2>
+        <p class="sub">
+          Submit tickets, view updates, and message support. This is the end-user experience.
+        </p>
+        <div class="btnrow" style="margin-top:12px">
+          <a class="btn" href="./app/index.html">Launch Customer App</a>
+          <a class="btn ghost" href="./app/tickets.html">Go to Tickets</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Admin / Tech Console</h2>
+        <p class="sub">
+          Separate power console for triage, assignment, and ops workflows.
+          (Admin backend routes will be wired in Phase 2.)
+        </p>
+        <div class="btnrow" style="margin-top:12px">
+          <a class="btn" href="./admin/index.html">Launch Admin Console</a>
+          <a class="btn ghost" href="./admin/tickets.html">Open Ticket Queue</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Status</h2>
+      <p class="sub">
+        GitHub Pages is serving from <code style="color:var(--lime)">/docs</code>.
+        If you don’t see changes immediately, hard refresh with <b>Ctrl + Shift + R</b>.
       </p>
-
-      <div class="grid-2">
-        <div class="card card-pad">
-          <h3>Launch</h3>
-          <p>Go straight to the ticketing system UI.</p>
-          <div class="actions">
-            <a class="btn btn-solid" href="tickets.html">Open Live App</a>
-            <a class="btn btn-ghost"
-               href="https://docs.google.com/document/d/1hToyl2xu5BbLZD0a825eTZHSBKAo_CU5RM6nbIVrTxs/edit?usp=sharing"
-               target="_blank" rel="noopener">Architecture</a>
-          </div>
-          <div class="hr"></div>
-          <p class="k">Tip</p>
-          <p>Use the “Create Ticket” panel in the Live App to generate test tickets whenever you want.</p>
-        </div>
-
-        <div class="card card-pad">
-          <h3>Resume + Links</h3>
-          <p>Recruiter-friendly resume page plus profile links.</p>
-          <div class="actions">
-            <a class="btn btn-solid" href="resume.html">Open Resume</a>
-            <a class="btn" href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
-            <a class="btn" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-          </div>
-          <div class="hr"></div>
-          <p class="k">Showcase</p>
-          <p>Schema-style portfolio view for fast skimming.</p>
-          <div class="actions">
-            <a class="btn btn-ghost" href="Showcase.html">Open Showcase</a>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <div class="footer">
-      <div>© 2026 — DeVayhn (Devayjah) Coleman</div>
-    </div>
-
   </div>
-
-  <script src="script.js?v=4"></script>
 </body>
 </html>
