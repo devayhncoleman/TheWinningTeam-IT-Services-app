@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin • TheWinningTeam IT Services</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Admin / Tech Console</h1>
+      </div>
+      <div class="nav">
+        <a class="pill active" href="./index.html">Home</a>
+        <a class="pill" href="./tickets.html">Ticket Queue</a>
+        <a class="pill" href="./users.html">Users</a>
+        <a class="pill" href="./groups.html">Groups</a>
+        <a class="pill" href="../app/index.html">Customer</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Ops Snapshot</h2>
+        <p class="sub">
+          This console is intentionally separate from the customer product.
+          Same theme. Different power.
+        </p>
+
+        <div class="kpi" style="margin-top:10px">
+          <span class="sub">Current dev identity</span>
+          <b id="whoami">—</b>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="sub">Console identity</label>
+          <select id="roleSelect" class="input" style="margin-top:6px">
+            <option value="admin">Admin</option>
+            <option value="tech">Tech</option>
+            <option value="customer">Customer (read-only testing)</option>
+          </select>
+        </div>
+
+        <div class="btnrow" style="margin-top:12px">
+          <a class="btn" href="./tickets.html">Open Ticket Queue</a>
+          <a class="btn ghost" href="../index.html">Marketing</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backend note</h2>
+        <p class="sub">
+          This UI expects Phase 2 admin routes:
+          <code style="color:var(--lime)">GET /admin/tickets</code>,
+          <code style="color:var(--lime)">PATCH /admin/tickets/{id}</code>.
+        </p>
+        <hr />
+        <p class="sub">
+          If those routes aren’t live yet, you’ll still have a clean UI ready to wire in.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getDevIdentity, setDevRole } from "../assets/api.js";
+
+    const whoami = document.getElementById("whoami");
+    const roleSelect = document.getElementById("roleSelect");
+
+    const id = getDevIdentity("admin");
+    whoami.textContent = `${id.role} (${id.userId})`;
+    roleSelect.value = id.role;
+
+    roleSelect.addEventListener("change", () => {
+      setDevRole(roleSelect.value);
+      const next = getDevIdentity("admin");
+      whoami.textContent = `${next.role} (${next.userId})`;
+    });
+  </script>
+</body>
+</html>
