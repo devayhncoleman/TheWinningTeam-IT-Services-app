@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tech Portal</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Tech Portal</h1>
+      </div>
+      <div class="nav">
+        <a class="pill active" href="./index.html">Home</a>
+        <a class="pill" href="./tickets.html">My Tickets</a>
+        <a class="pill" href="../admin/index.html">Admin</a>
+        <a class="pill" href="../app/tickets.html">Customer</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Identity (Dev Mode)</h2>
+        <p class="sub">
+          This is dev-mode login. Pick a tech identity and it will be used as the <code style="color:var(--lime)">x-user-id</code>.
+        </p>
+
+        <label class="sub">Tech User</label>
+        <select id="user" class="input">
+          <option value="tech_mike">tech_mike</option>
+          <option value="tech_sara">tech_sara</option>
+        </select>
+
+        <div class="btnrow" style="margin-top:10px">
+          <button id="save" class="btn">Save</button>
+          <a class="btn ghost" href="./tickets.html">Go to My Tickets</a>
+        </div>
+
+        <p id="status" class="sub" style="margin-top:10px"></p>
+      </div>
+
+      <div class="card">
+        <h2>What Tech Can Do</h2>
+        <ul class="sub" style="line-height:1.8; margin:0; padding-left:18px">
+          <li>View only tickets assigned to you</li>
+          <li>Open ticket detail</li>
+          <li>1-on-1 chat (only participants)</li>
+          <li>Update status (IN_PROGRESS / RESOLVED)</li>
+        </ul>
+
+        <div class="kpi" style="margin-top:12px">
+          <span class="sub">Endpoint</span>
+          <b>/tech/tickets</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { toast } from "../assets/ui.js";
+    import { getDevIdentity, setDevIdentity } from "../assets/api.js";
+
+    const user = document.getElementById("user");
+    const save = document.getElementById("save");
+    const status = document.getElementById("status");
+
+    const id = getDevIdentity("tech");
+    user.value = id.userId || "tech_mike";
+    status.textContent = `Current: ${id.userId} (${id.role})`;
+
+    save.addEventListener("click", () => {
+      const next = setDevIdentity(user.value);
+      status.textContent = `Saved: ${next.userId} (${next.role})`;
+      toast(`Saved identity: ${next.userId}`, "info");
+    });
+  </script>
+</body>
+</html>
