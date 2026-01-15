@@ -1,7 +1,10 @@
+// docs/assets/api.js
 // ==============================================
 // The Winning Team — Shared API Client (Frontends)
-// Location: docs/assets/api.js  (IMPORTANT)
-// ES Module exports used by admin/tech/customer pages
+// Supports list responses shaped as:
+//   - { items: [...] }   (your Tickets lambda pattern)
+//   - { tickets: [...] } (alternate)
+//   - [...]              (direct array)
 // ==============================================
 
 function mustConfig() {
@@ -17,7 +20,11 @@ function headerUserId(userId) {
 
 async function request(path, { method = "GET", userId, body } = {}) {
   const { API_BASE_URL } = mustConfig();
-  const url = `${API_BASE_URL}${path}`;
+
+  // IMPORTANT: avoid double slashes
+  const base = String(API_BASE_URL).replace(/\/+$/, "");
+  const p = String(path).startsWith("/") ? path : `/${path}`;
+  const url = `${base}${p}`;
 
   const headers = {
     ...headerUserId(userId || "demo-user"),
@@ -43,7 +50,6 @@ async function request(path, { method = "GET", userId, body } = {}) {
     const msg = data?.message || `Request failed (${res.status})`;
     throw new Error(msg);
   }
-
   return data;
 }
 
@@ -51,7 +57,7 @@ function normalizeList(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.tickets)) return data.tickets;
-  if (Array.isArray(data?.Items)) return data.Items;
+  if (Array.isArray(data?.Messages)) return data.Messages;
   return [];
 }
 
@@ -86,23 +92,22 @@ export function setDevIdentity(userId) {
 }
 
 // ----------------------
-// Friendly wrappers
+// Helpers for "admin not deployed yet" UX
 // ----------------------
-export async function tryAdmin(fn, friendlyMsg = "Admin routes not deployed or not authorized.") {
+export async function tryAdmin(fn, friendlyMessage) {
   try {
     return await fn();
   } catch (e) {
-    const msg = e?.message || String(e);
-    throw new Error(`${friendlyMsg} (${msg})`);
-  }
-}
-
-export async function tryTech(fn, friendlyMsg = "Tech routes not deployed or not authorized.") {
-  try {
-    return await fn();
-  } catch (e) {
-    const msg = e?.message || String(e);
-    throw new Error(`${friendlyMsg} (${msg})`);
+    // If the route is missing in API GW you might see "Not Found" or "Route not handled"
+    const msg = String(e?.message || "");
+    if (
+      msg.includes("Not Found") ||
+      msg.includes("Route not handled") ||
+      msg.includes("Missing Authentication Token")
+    ) {
+      throw new Error(friendlyMessage || "Admin routes not deployed.");
+    }
+    throw e;
   }
 }
 
@@ -126,24 +131,30 @@ export async function customerPatchTicket({ userId, ticketId, patch }) {
   return request(`/tickets/${encodeURIComponent(ticketId)}`, { method: "PATCH", userId, body: patch });
 }
 
-// Messages (shared — customer/tech/admin can use if they are participant)
-export async function listMessages({ userId, ticketId }) {
+export async function customerListMessages({ userId, ticketId }) {
   const data = await request(`/tickets/${encodeURIComponent(ticketId)}/messages`, { method: "GET", userId });
-  // your backend seems to return { messages: [...] }
-  if (Array.isArray(data?.messages)) return data.messages;
   return normalizeList(data);
 }
 
-export async function sendMessage({ userId, ticketId, messageText }) {
-  return request(`/tickets/${encodeURIComponent(ticketId)}/messages`, {
-    method: "POST",
-    userId,
-    body: { messageText }
-  });
+export async function customerPostMessage({ userId, ticketId, payload }) {
+  return request(`/tickets/${encodeURIComponent(ticketId)}/messages`, { method: "POST", userId, body: payload });
 }
 
 // ----------------------
-// Admin APIs (your PowerShell proves these exist)
+// Tech APIs
+// ----------------------
+export async function techListAssignedTickets({ techUserId }) {
+  const data = await request(`/tech/tickets`, { method: "GET", userId: techUserId });
+  return normalizeList(data);
+}
+
+// optional: tech can update ticket status/notes via /tickets/{id} PATCH if your lambda allows it
+export async function techPatchTicket({ techUserId, ticketId, patch }) {
+  return request(`/tickets/${encodeURIComponent(ticketId)}`, { method: "PATCH", userId: techUserId, body: patch });
+}
+
+// ----------------------
+// Admin APIs
 // ----------------------
 export async function adminListAllTickets({ adminUserId }) {
   const data = await request(`/admin/tickets`, { method: "GET", userId: adminUserId });
@@ -155,17 +166,5 @@ export async function adminGetTicket({ adminUserId, ticketId }) {
 }
 
 export async function adminPatchTicket({ adminUserId, ticketId, patch }) {
-  return request(`/admin/tickets/${encodeURIComponent(ticketId)}`, {
-    method: "PATCH",
-    userId: adminUserId,
-    body: patch
-  });
-}
-
-// ----------------------
-// Tech APIs
-// ----------------------
-export async function techListAssignedTickets({ techUserId }) {
-  const data = await request(`/tech/tickets`, { method: "GET", userId: techUserId });
-  return normalizeList(data);
+  return request(`/admin/tickets/${encodeURIComponent(ticketId)}`, { method: "PATCH", userId: adminUserId, body: patch });
 }
