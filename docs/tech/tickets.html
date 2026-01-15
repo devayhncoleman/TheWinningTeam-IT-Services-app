@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tech — My Tickets</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>My Assigned Tickets</h1>
+      </div>
+      <div class="nav">
+        <a class="pill" href="./index.html">Home</a>
+        <a class="pill active" href="./tickets.html">My Tickets</a>
+        <a class="pill" href="../admin/tickets.html">Admin Queue</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Filters</h2>
+        <label class="sub">Search</label>
+        <input id="search" class="input" placeholder="title, ticketId, status, priority..." />
+        <div class="btnrow" style="margin-top:10px">
+          <button id="refresh" class="btn">Refresh</button>
+          <a class="btn ghost" href="./index.html">Back</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Mode</h2>
+        <p class="sub">Calls <code style="color:var(--lime)">GET /tech/tickets</code> with your dev identity.</p>
+        <div class="kpi">
+          <span class="sub">Loaded</span>
+          <b id="count">0</b>
+        </div>
+        <p id="who" class="sub" style="margin-top:10px"></p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Tickets</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Customer</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="5" class="sub">No data yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { escapeHtml, formatIso, toast } from "../assets/ui.js";
+    import { getDevIdentity, tryTech, techListAssignedTickets } from "../assets/api.js";
+
+    const rows = document.getElementById("rows");
+    const count = document.getElementById("count");
+    const search = document.getElementById("search");
+    const refresh = document.getElementById("refresh");
+    const who = document.getElementById("who");
+
+    let all = [];
+
+    function render() {
+      const q = (search.value || "").toLowerCase().trim();
+
+      const filtered = all.filter(t => {
+        const hay = [t.ticketId, t.title, t.status, t.priority, t.userId].filter(Boolean).join(" ").toLowerCase();
+        return !q || hay.includes(q);
+      });
+
+      count.textContent = String(filtered.length);
+
+      if (!filtered.length) {
+        rows.innerHTML = `<tr><td colspan="5" class="sub">No tickets match your search.</td></tr>`;
+        return;
+      }
+
+      rows.innerHTML = filtered.map(t => {
+        const id = escapeHtml(t.ticketId || "—");
+        const title = escapeHtml(t.title || "");
+        const st = escapeHtml(t.status || "—");
+        const pr = escapeHtml(t.priority || "—");
+        const cust = escapeHtml(t.userId || "—");
+        const upd = escapeHtml(formatIso(t.updatedAt || t.createdAt));
+
+        return `
+          <tr>
+            <td>
+              <a href="./ticket-detail.html?ticketId=${encodeURIComponent(t.ticketId)}">${id}</a><br>
+              <span class="sub">${title}</span>
+            </td>
+            <td>${st}</td>
+            <td>${pr}</td>
+            <td class="mono">${cust}</td>
+            <td>${upd}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function load() {
+      rows.innerHTML = `<tr><td colspan="5" class="sub">Loading…</td></tr>`;
+
+      const { userId } = getDevIdentity("tech");
+      who.textContent = `Identity: ${userId}`;
+
+      try {
+        const data = await tryTech(
+          () => techListAssignedTickets({ techUserId: userId }),
+          "Tech routes not available yet."
+        );
+        all = Array.isArray(data) ? data : [];
+        toast(`Loaded ${all.length} ticket(s)`, "info");
+      } catch (e) {
+        all = [];
+        rows.innerHTML = `<tr><td colspan="5" class="sub">Failed: ${escapeHtml(e.message)}</td></tr>`;
+        count.textContent = "0";
+        return;
+      }
+
+      render();
+    }
+
+    refresh.addEventListener("click", load);
+    search.addEventListener("input", render);
+    load();
+  </script>
+</body>
+</html>
