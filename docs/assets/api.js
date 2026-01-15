@@ -1,9 +1,7 @@
 // ==============================================
 // The Winning Team — Shared API Client (Frontends)
-// Works with responses shaped as:
-//   - { items: [...] }   (your existing Tickets lambda pattern)
-//   - { tickets: [...] } (alt)
-//   - [...]              (direct array)
+// Location: docs/assets/api.js  (IMPORTANT)
+// ES Module exports used by admin/tech/customer pages
 // ==============================================
 
 function mustConfig() {
@@ -35,12 +33,17 @@ async function request(path, { method = "GET", userId, body } = {}) {
 
   const text = await res.text();
   let data;
-  try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text };
+  }
 
   if (!res.ok) {
     const msg = data?.message || `Request failed (${res.status})`;
     throw new Error(msg);
   }
+
   return data;
 }
 
@@ -48,7 +51,7 @@ function normalizeList(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.tickets)) return data.tickets;
-  if (Array.isArray(data?.Messages)) return data.Messages; // just in case
+  if (Array.isArray(data?.Items)) return data.Items;
   return [];
 }
 
@@ -56,7 +59,6 @@ function normalizeList(data) {
 // Dev identity storage
 // ----------------------
 export function getDevIdentity(defaultRole = "customer") {
-  // Stored by your home pages (customer/admin) or defaults
   const raw = localStorage.getItem("TWT_DEV_IDENTITY");
   if (raw) {
     try {
@@ -65,7 +67,6 @@ export function getDevIdentity(defaultRole = "customer") {
     } catch {}
   }
 
-  // fallback identity if nothing set
   const fallback =
     defaultRole === "admin" ? { userId: "admin_jordan", role: "admin" } :
     defaultRole === "tech" ? { userId: "tech_mike", role: "tech" } :
@@ -82,6 +83,27 @@ export function setDevIdentity(userId) {
 
   localStorage.setItem("TWT_DEV_IDENTITY", JSON.stringify({ userId, role }));
   return { userId, role };
+}
+
+// ----------------------
+// Friendly wrappers
+// ----------------------
+export async function tryAdmin(fn, friendlyMsg = "Admin routes not deployed or not authorized.") {
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = e?.message || String(e);
+    throw new Error(`${friendlyMsg} (${msg})`);
+  }
+}
+
+export async function tryTech(fn, friendlyMsg = "Tech routes not deployed or not authorized.") {
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = e?.message || String(e);
+    throw new Error(`${friendlyMsg} (${msg})`);
+  }
 }
 
 // ----------------------
@@ -104,3 +126,46 @@ export async function customerPatchTicket({ userId, ticketId, patch }) {
   return request(`/tickets/${encodeURIComponent(ticketId)}`, { method: "PATCH", userId, body: patch });
 }
 
+// Messages (shared — customer/tech/admin can use if they are participant)
+export async function listMessages({ userId, ticketId }) {
+  const data = await request(`/tickets/${encodeURIComponent(ticketId)}/messages`, { method: "GET", userId });
+  // your backend seems to return { messages: [...] }
+  if (Array.isArray(data?.messages)) return data.messages;
+  return normalizeList(data);
+}
+
+export async function sendMessage({ userId, ticketId, messageText }) {
+  return request(`/tickets/${encodeURIComponent(ticketId)}/messages`, {
+    method: "POST",
+    userId,
+    body: { messageText }
+  });
+}
+
+// ----------------------
+// Admin APIs (your PowerShell proves these exist)
+// ----------------------
+export async function adminListAllTickets({ adminUserId }) {
+  const data = await request(`/admin/tickets`, { method: "GET", userId: adminUserId });
+  return normalizeList(data);
+}
+
+export async function adminGetTicket({ adminUserId, ticketId }) {
+  return request(`/admin/tickets/${encodeURIComponent(ticketId)}`, { method: "GET", userId: adminUserId });
+}
+
+export async function adminPatchTicket({ adminUserId, ticketId, patch }) {
+  return request(`/admin/tickets/${encodeURIComponent(ticketId)}`, {
+    method: "PATCH",
+    userId: adminUserId,
+    body: patch
+  });
+}
+
+// ----------------------
+// Tech APIs
+// ----------------------
+export async function techListAssignedTickets({ techUserId }) {
+  const data = await request(`/tech/tickets`, { method: "GET", userId: techUserId });
+  return normalizeList(data);
+}
