@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tech — Ticket Detail</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge"></div>
+        <h1>Ticket Detail</h1>
+      </div>
+      <div class="nav">
+        <a class="pill" href="./tickets.html">My Tickets</a>
+        <a class="pill" href="../admin/tickets.html">Admin Queue</a>
+        <a class="pill" href="../app/tickets.html">Customer</a>
+      </div>
+    </div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>Ticket</h2>
+        <div id="meta" class="sub">Loading…</div>
+
+        <div class="grid" style="margin-top:12px; gap:10px">
+          <div>
+            <label class="sub">Update Status</label>
+            <select id="status" class="input">
+              <option value="">(no change)</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="IN_REVIEW">IN_REVIEW</option>
+              <option value="OPEN">OPEN</option>
+            </select>
+          </div>
+          <div class="btnrow">
+            <button id="apply" class="btn">Apply</button>
+            <a class="btn ghost" href="./tickets.html">Back</a>
+          </div>
+          <p id="patchMsg" class="sub"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Chat (1-on-1)</h2>
+        <p class="sub">
+          Only participants can read/post. If you’re not assigned, you’ll get <b>Forbidden</b>.
+        </p>
+
+        <div id="messages" class="chatbox"></div>
+
+        <div class="grid" style="margin-top:10px; gap:10px">
+          <textarea id="msg" class="input" rows="3" placeholder="Write a message…"></textarea>
+          <div class="btnrow">
+            <button id="send" class="btn">Send</button>
+            <button id="reload" class="btn ghost">Reload</button>
+          </div>
+          <p id="chatMsg" class="sub"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { escapeHtml, formatIso, toast } from "../assets/ui.js";
+    import { getDevIdentity, customerGetTicket, customerPatchTicket, listMessages, sendMessage } from "../assets/api.js";
+
+    const meta = document.getElementById("meta");
+    const statusSel = document.getElementById("status");
+    const apply = document.getElementById("apply");
+    const patchMsg = document.getElementById("patchMsg");
+
+    const messages = document.getElementById("messages");
+    const msg = document.getElementById("msg");
+    const send = document.getElementById("send");
+    const reload = document.getElementById("reload");
+    const chatMsg = document.getElementById("chatMsg");
+
+    function getTicketId() {
+      const p = new URLSearchParams(location.search);
+      return p.get("ticketId");
+    }
+
+    function renderMeta(t) {
+      meta.innerHTML = `
+        <div class="meta-grid">
+          <div><div class="k">TICKET</div><div class="v mono">${escapeHtml(t.ticketId || "—")}</div></div>
+          <div><div class="k">STATUS</div><div class="v">${escapeHtml(t.status || "—")}</div></div>
+          <div><div class="k">PRIORITY</div><div class="v">${escapeHtml(t.priority || "—")}</div></div>
+          <div><div class="k">CUSTOMER</div><div class="v mono">${escapeHtml(t.userId || t.createdByUserId || "—")}</div></div>
+          <div><div class="k">ASSIGNED TECH</div><div class="v mono">${escapeHtml(t.assignedTechId || "—")}</div></div>
+          <div class="meta-wide"><div class="k">TITLE</div><div class="v">${escapeHtml(t.title || "")}</div></div>
+          <div class="meta-wide"><div class="k">DESCRIPTION</div><div class="v">${escapeHtml(t.description || "")}</div></div>
+          <div><div class="k">UPDATED</div><div class="v">${escapeHtml(formatIso(t.updatedAt || t.createdAt))}</div></div>
+        </div>
+      `;
+    }
+
+    function renderMsgs(list) {
+      if (!list.length) {
+        messages.innerHTML = `<div class="sub">No messages yet.</div>`;
+        return;
+      }
+
+      messages.innerHTML = list.map(m => {
+        const role = escapeHtml((m.senderRole || "USER").toUpperCase());
+        const who = escapeHtml(m.senderId || "");
+        const when = escapeHtml(formatIso(m.timestamp));
+        const body = escapeHtml(m.messageText || "");
+        return `
+          <div class="msg">
+            <div class="msg-head">
+              <span class="badge">${role}</span>
+              <span class="mono">${who}</span>
+              <span style="margin-left:auto" class="mono">${when}</span>
+            </div>
+            <div class="msg-body">${body}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadAll() {
+      const ticketId = getTicketId();
+      if (!ticketId) {
+        meta.innerHTML = `<div class="sub">Missing ticketId in URL.</div>`;
+        return;
+      }
+
+      const { userId } = getDevIdentity("tech");
+
+      // Ticket (uses /tickets/{id} participant check)
+      try {
+        const t = await customerGetTicket({ userId, ticketId });
+        renderMeta(t);
+      } catch (e) {
+        meta.innerHTML = `<div class="sub">Failed to load ticket: ${escapeHtml(e.message)}</div>`;
+        return;
+      }
+
+      // Messages
+      try {
+        const list = await listMessages({ userId, ticketId });
+        renderMsgs(Array.isArray(list) ? list : []);
+        chatMsg.textContent = "";
+      } catch (e) {
+        messages.innerHTML = `<div class="sub">Messages failed: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    apply.addEventListener("click", async () => {
+      const ticketId = getTicketId();
+      const { userId } = getDevIdentity("tech");
+      const next = statusSel.value;
+
+      if (!next) {
+        patchMsg.textContent = "Pick a status first.";
+        return;
+      }
+
+      patchMsg.textContent = "Applying...";
+      try {
+        await customerPatchTicket({ userId, ticketId, patch: { status: next } });
+        patchMsg.textContent = "Updated.";
+        toast("Status updated", "info");
+        await loadAll();
+        statusSel.value = "";
+      } catch (e) {
+        patchMsg.textContent = `Failed: ${e.message}`;
+      }
+    });
+
+    send.addEventListener("click", async () => {
+      const ticketId = getTicketId();
+      const { userId } = getDevIdentity("tech");
+      const text = (msg.value || "").trim();
+      if (!text) return;
+
+      chatMsg.textContent = "Sending...";
+      try {
+        await sendMessage({ userId, ticketId, messageText: text });
+        msg.value = "";
+        chatMsg.textContent = "Sent.";
+        await loadAll();
+      } catch (e) {
+        chatMsg.textContent = `Failed: ${e.message}`;
+      }
+    });
+
+    reload.addEventListener("click", loadAll);
+    loadAll();
+  </script>
+</body>
+</html>
